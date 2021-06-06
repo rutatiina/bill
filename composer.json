@@ -17,5 +17,12 @@
         "psr-4": {
             "Rutatiina\\Bill\\": "src/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rutatiina\\Bill\\BillServiceProvider"
+            ]
+        }
     }
 }
