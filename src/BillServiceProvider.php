@@ -27,6 +27,6 @@ class BillServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->make('Rutatiina\Bill\Http\Controllers\DefaultController');
+        $this->app->make('Rutatiina\Bill\Http\Controllers\BillController');
     }
 }
