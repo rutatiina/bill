@@ -27,20 +27,16 @@ class CreateRgBillItemsTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('bill_id');
-            $table->enum('type', ['item', 'contact', 'account', 'txn_type', 'txn', 'tax'])->nullable();
-            $table->unsignedBigInteger('type_id')->nullable();
+            $table->unsignedBigInteger('item_id')->nullable();
+            $table->unsignedBigInteger('debit_financial_account_code')->nullable();
             $table->unsignedBigInteger('contact_id')->nullable();
             $table->string('name', 100);
             $table->string('description', 250)->nullable();
             $table->unsignedInteger('quantity');
             $table->unsignedDecimal('rate', 20,5);
-            $table->unsignedBigInteger('tax_id')->nullable();
+            $table->unsignedDecimal('taxable_amount', 20, 5);
             $table->unsignedDecimal('total', 20, 5);
             $table->unsignedDecimal('discount_amount', 20, 5)->nullable();
-            $table->unsignedInteger('units')->nullable();
-            $table->string('batch', 100)->nullable();
-            $table->date('expiry')->nullable();
-            $table->string('taxes', 100)->nullable();
         });
     }
 

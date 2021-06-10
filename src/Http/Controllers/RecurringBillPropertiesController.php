@@ -14,7 +14,7 @@ use Rutatiina\Item\Traits\ItemsVueSearchSelect;
 use Yajra\DataTables\Facades\DataTables;
 use Rutatiina\FinancialAccounting\Models\Account;
 
-class RecurringPropertiesController extends Controller
+class RecurringBillPropertiesController extends Controller
 {
     use FinancialAccountingTrait;
     use ItemsVueSearchSelect;

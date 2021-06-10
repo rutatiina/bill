@@ -1,10 +1,10 @@
 <?php
 
-namespace Rutatiina\Invoice\Services;
+namespace Rutatiina\Bill\Services;
 
-use Rutatiina\Invoice\Models\InvoiceRecurringProperty;
+use Rutatiina\Bill\Models\RecurringBillProperty;
 
-class InvoiceRecurringPropertyService
+class RecurringBillPropertyService
 {
     public static $errors = [];
 
@@ -15,9 +15,9 @@ class InvoiceRecurringPropertyService
 
     public static function store($data)
     {
-        $TxnRecurring = new InvoiceRecurringProperty;
+        $TxnRecurring = new RecurringBillProperty;
         $TxnRecurring->tenant_id = $data['tenant_id'];
-        $TxnRecurring->invoice_recurring_id = $data['id'];
+        $TxnRecurring->recurring_bill_id = $data['id'];
         $TxnRecurring->status = $data['recurring']['status'];
         $TxnRecurring->frequency = $data['recurring']['frequency'];
         //$TxnRecurring->measurement = $data['recurring']['frequency']; //of no use

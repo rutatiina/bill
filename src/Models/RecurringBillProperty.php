@@ -7,7 +7,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 use Cron\CronExpression;
 
-class RecurringBillProperties extends Model
+class RecurringBillProperty extends Model
 {
     use LogsActivity;
 

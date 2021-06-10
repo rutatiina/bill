@@ -1,11 +1,11 @@
 <?php
 
-namespace Rutatiina\Invoice\Services;
+namespace Rutatiina\Bill\Services;
 
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
 
-trait InvoiceApprovalService
+trait BillApprovalService
 {
     public static function run($data)
     {

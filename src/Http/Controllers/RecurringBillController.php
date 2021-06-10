@@ -2,41 +2,16 @@
 
 namespace Rutatiina\Bill\Http\Controllers;
 
-use URL;
-use PDF;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request as FacadesRequest;
-use Illuminate\Support\Facades\View;
-use Rutatiina\Bill\Models\BillRecurring;
-use Rutatiina\Bill\Models\Setting;
-use Rutatiina\FinancialAccounting\Traits\FinancialAccountingTrait;
-use Rutatiina\Contact\Traits\ContactTrait;
-use Yajra\DataTables\Facades\DataTables;
-use Rutatiina\FinancialAccounting\Traits\Recurring as FinancialAccountingRecurringTrait;
+use Rutatiina\Bill\Models\RecurringBill;
+use Rutatiina\Bill\Services\RecurringBillService;
 
-use Rutatiina\Bill\Classes\Recurring\Store as TxnStore;
-use Rutatiina\Bill\Classes\Recurring\Approve as TxnApprove;
-use Rutatiina\Bill\Classes\Recurring\Read as TxnRead;
-use Rutatiina\Bill\Classes\Recurring\Copy as TxnCopy;
-use Rutatiina\Bill\Classes\Recurring\Number as TxnNumber;
-use Rutatiina\Bill\Traits\Recurring\Item as TxnItem;
-use Rutatiina\Bill\Classes\Recurring\Edit as TxnEdit;
-use Rutatiina\Bill\Classes\Recurring\Update as TxnUpdate;
-
-class RecurringController extends Controller
+class RecurringBillController extends Controller
 {
-    use FinancialAccountingTrait;
-    use ContactTrait;
-    use TxnItem;
-
-    // >> get the item attributes template << !!important
-
-    use FinancialAccountingRecurringTrait;
-
-    private $txnEntreeSlug = 'recurring-bill';
-
     public function __construct()
     {
         $this->middleware('permission:recurring-bills.view');
@@ -53,14 +28,13 @@ class RecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $query = BillRecurring::query();
+        $query = RecurringBill::query();
 
         if ($request->contact)
         {
             $query->where(function ($q) use ($request)
             {
-                $q->where('debit_contact_id', $request->contact);
-                $q->orWhere('credit_contact_id', $request->contact);
+                $q->where('contact_id', $request->contact);
             });
         }
 
@@ -69,14 +43,6 @@ class RecurringController extends Controller
         return [
             'tableData' => $txns
         ];
-    }
-
-    private function nextNumber()
-    {
-        $txn = BillRecurring::latest()->first();
-        $settings = Setting::first();
-
-        return $settings->number_prefix . (str_pad((optional($txn)->number + 1), $settings->minimum_number_length, "0", STR_PAD_LEFT)) . $settings->number_postfix;
     }
 
     public function create()
@@ -89,12 +55,9 @@ class RecurringController extends Controller
 
         $tenant = Auth::user()->tenant;
 
-        $txnAttributes = (new BillRecurring())->rgGetAttributes();
-
-        $txnAttributes['number'] = $this->nextNumber();
+        $txnAttributes = (new RecurringBill())->rgGetAttributes();
 
         $txnAttributes['status'] = 'approved';
-        $txnAttributes['contact_id'] = '';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
         $txnAttributes['date'] = date('Y-m-d');
         $txnAttributes['base_currency'] = $tenant->base_currency;
@@ -113,36 +76,38 @@ class RecurringController extends Controller
         ];
         $txnAttributes['contact_notes'] = null;
         $txnAttributes['terms_and_conditions'] = null;
-        $txnAttributes['items'] = [$this->itemCreate()];
+        $txnAttributes['items'] = [[
+            'selectedTaxes' => [], #required
+            'selectedItem' => json_decode('{}'), #required
+            'displayTotal' => 0,
+            'name' => '',
+            'description' => '',
+            'rate' => 0,
+            'quantity' => 1,
+            'total' => 0,
+            'taxes' => [],
+            'item_id' => '',
+            'contact_id' => '',
+            'debit_financial_account_code' => 0,
+        ]];
 
-        unset($txnAttributes['txn_entree_id']); //!important
-        unset($txnAttributes['txn_type_id']); //!important
-        unset($txnAttributes['debit_contact_id']); //!important
-        unset($txnAttributes['credit_contact_id']); //!important
-
-        $data = [
+        return [
             'pageTitle' => 'Create Recurring Bill', #required
             'pageAction' => 'Create', #required
             'txnUrlStore' => '/recurring-bills', #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        return $data;
-
     }
 
     public function store(Request $request)
     {
-        $TxnStore = new TxnStore();
-        $TxnStore->txnEntreeSlug = $this->txnEntreeSlug;
-        $TxnStore->txnInsertData = $request->all();
-        $insert = $TxnStore->run();
+        $storeService = RecurringBillService::store($request);
 
-        if ($insert == false)
+        if ($storeService == false)
         {
             return [
                 'status' => false,
-                'messages' => $TxnStore->errors
+                'messages' => RecurringBillService::$errors
             ];
         }
 
@@ -150,7 +115,7 @@ class RecurringController extends Controller
             'status' => true,
             'messages' => ['Recurring Bill saved'],
             'number' => 0,
-            'callback' => URL::route('recurring-bills.show', [$insert->id], false)
+            'callback' => URL::route('recurring-bills.show', [$storeService->id], false)
         ];
     }
 
@@ -162,13 +127,15 @@ class RecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        if (FacadesRequest::wantsJson())
-        {
-            $TxnRead = new TxnRead();
-            $data = $TxnRead->run($id);
-            $data['recurringOptions'] = $this->recurringOptions();
-            return $data;
-        }
+        $txn = RecurringBill::findOrFail($id);
+        $txn->load('contact', 'properties', 'items.taxes');
+        $txn->setAppends([
+            'taxes',
+            'number_string',
+            'total_in_words',
+        ]);
+
+        return $txn->toArray();
     }
 
     public function edit($id)
@@ -179,35 +146,27 @@ class RecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $TxnEdit = new TxnEdit();
-        $txnAttributes = $TxnEdit->run($id);
+        $txnAttributes = RecurringBillService::edit($id);
 
-        $data = [
+        return [
             'pageTitle' => 'Edit Recurring Bill', #required
             'pageAction' => 'Edit', #required
             'txnUrlStore' => '/recurring-bills/' . $id, #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        if (FacadesRequest::wantsJson())
-        {
-            return $data;
-        }
     }
 
     public function update(Request $request)
     {
         //print_r($request->all()); exit;
 
-        $TxnStore = new TxnUpdate();
-        $TxnStore->txnInsertData = $request->all();
-        $insert = $TxnStore->run();
+        $updateService = RecurringBillService::update($request);
 
-        if ($insert == false)
+        if ($updateService == false)
         {
             return [
                 'status' => false,
-                'messages' => $TxnStore->errors
+                'messages' => RecurringBillService::$errors
             ];
         }
 
@@ -215,26 +174,41 @@ class RecurringController extends Controller
             'status' => true,
             'messages' => ['Recurring Bill updated'],
             'number' => 0,
-            'callback' => URL::route('recurring-bills.show', [$insert->id], false)
+            'callback' => URL::route('recurring-bills.show', [$updateService->id], false)
         ];
     }
 
-    public function destroy()
+    public function destroy($id)
     {
+        $destroy = RecurringBillService::destroy($id);
+
+        if ($destroy)
+        {
+            return [
+                'status' => true,
+                'messages' => 'Recurring Bill deleted',
+            ];
+        }
+        else
+        {
+            return [
+                'status' => false,
+                'messages' => RecurringBillService::$errors
+            ];
+        }
     }
 
     #-----------------------------------------------------------------------------------
 
     public function approve($id)
     {
-        $TxnApprove = new TxnApprove();
-        $approve = $TxnApprove->run($id);
+        $approve = RecurringBillService::approve($id);
 
         if ($approve == false)
         {
             return [
                 'status' => false,
-                'messages' => $TxnApprove->errors
+                'messages' => RecurringBillService::$errors
             ];
         }
 
@@ -253,11 +227,7 @@ class RecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $TxnCopy = new TxnCopy();
-        $txnAttributes = $TxnCopy->run($id);
-
-        $TxnNumber = new TxnNumber();
-        $txnAttributes['number'] = $TxnNumber->run($this->txnEntreeSlug);
+        $txnAttributes = RecurringBillService::copy($id);
 
 
         $data = [
@@ -271,45 +241,6 @@ class RecurringController extends Controller
         {
             return $data;
         }
-    }
-
-    public function exportToExcel(Request $request)
-    {
-
-        $txns = collect([]);
-
-        $txns->push([
-            'DATE',
-            'REFERENCE',
-            'SUPPLIER / VENDOR',
-            'EXPIRY DATE',
-            'TOTAL',
-            ' ', //Currency
-        ]);
-
-        foreach (array_reverse($request->ids) as $id)
-        {
-            $txn = Transaction::transaction($id);
-
-            $txns->push([
-                $txn->date,
-                $txn->reference,
-                $txn->contact_name,
-                $txn->expiry_date,
-                $txn->total,
-                $txn->base_currency,
-            ]);
-        }
-
-        $export = $txns->downloadExcel(
-            'maccounts-recurring-bills-export-' . date('Y-m-d-H-m-s') . '.xlsx',
-            null,
-            false
-        );
-
-        //$books->load('author', 'publisher'); //of no use
-
-        return $export;
     }
 
 }

@@ -1,18 +1,18 @@
 <?php
 
-namespace Rutatiina\Invoice\Services;
+namespace Rutatiina\Bill\Services;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Rutatiina\Invoice\Models\Invoice;
+use Rutatiina\Bill\Models\Bill;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
-use Rutatiina\Invoice\Models\Setting;
+use Rutatiina\Bill\Models\Setting;
 use Rutatiina\Tax\Models\Tax;
 
-class InvoiceService
+class BillService
 {
     public static $errors = [];
 
@@ -23,8 +23,8 @@ class InvoiceService
 
     public static function nextNumber()
     {
-        $count = Invoice::count();
-        $settings = Setting::first();
+        $count = Bill::count();
+        $settings = BillSetting::first();
 
         return $settings->number_prefix . (str_pad(($count + 1), $settings->minimum_number_length, "0", STR_PAD_LEFT)) . $settings->number_postfix;
     }
@@ -33,7 +33,7 @@ class InvoiceService
     {
         $taxes = Tax::all()->keyBy('code');
 
-        $txn = Invoice::findOrFail($id);
+        $txn = Bill::findOrFail($id);
         $txn->load('contact', 'items.taxes');
         $txn->setAppends(['taxes']);
 
@@ -80,11 +80,11 @@ class InvoiceService
 
     public static function store($requestInstance)
     {
-        $data = InvoiceValidateService::run($requestInstance);
+        $data = BillValidateService::run($requestInstance);
         //print_r($data); exit;
         if ($data === false)
         {
-            self::$errors = InvoiceValidateService::$errors;
+            self::$errors = BillValidateService::$errors;
             return false;
         }
 
@@ -93,7 +93,7 @@ class InvoiceService
 
         try
         {
-            $Txn = new Invoice;
+            $Txn = new Bill;
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
             $Txn->document_name = $data['document_name'];
@@ -124,13 +124,13 @@ class InvoiceService
             //print_r($data['items']); exit;
 
             //Save the items >> $data['items']
-            InvoiceItemService::store($data);
+            BillItemService::store($data);
 
             //Save the ledgers >> $data['ledgers']; and update the balances
-            InvoiceLedgerService::store($data);
+            BillLedgerService::store($data);
 
             //check status and update financial account and contact balances accordingly
-            $invoiceApprovalService = InvoiceApprovalService::run($data);
+            $invoiceApprovalService = BillApprovalService::run($data);
 
             //update the status of the txn
             if ($invoiceApprovalService)
@@ -173,11 +173,11 @@ class InvoiceService
 
     public static function update($requestInstance)
     {
-        $data = InvoiceValidateService::run($requestInstance);
+        $data = BillValidateService::run($requestInstance);
         //print_r($data); exit;
         if ($data === false)
         {
-            self::$errors = InvoiceValidateService::$errors;
+            self::$errors = BillValidateService::$errors;
             return false;
         }
 
@@ -186,7 +186,7 @@ class InvoiceService
 
         try
         {
-            $Txn = Invoice::with('items', 'ledgers')->findOrFail($data['id']);
+            $Txn = Bill::with('items', 'ledgers')->findOrFail($data['id']);
 
             if ($Txn->status == 'approved')
             {
@@ -236,13 +236,13 @@ class InvoiceService
             //print_r($data['items']); exit;
 
             //Save the items >> $data['items']
-            InvoiceItemService::store($data);
+            BillItemService::store($data);
 
             //Save the ledgers >> $data['ledgers']; and update the balances
-            InvoiceLedgersService::store($data);
+            BillLedgersService::store($data);
 
             //check status and update financial account and contact balances accordingly
-            $invoiceApprovalService = InvoiceApprovalService::run($data);
+            $invoiceApprovalService = BillApprovalService::run($data);
 
             //update the status of the txn
             if ($invoiceApprovalService)
@@ -289,7 +289,7 @@ class InvoiceService
 
         try
         {
-            $Txn = Invoice::findOrFail($id);
+            $Txn = Bill::findOrFail($id);
 
             if ($Txn->status == 'approved')
             {
@@ -344,7 +344,7 @@ class InvoiceService
     {
         $taxes = Tax::all()->keyBy('code');
 
-        $txn = Invoice::findOrFail($id);
+        $txn = Bill::findOrFail($id);
         $txn->load('contact', 'items.taxes');
         $txn->setAppends(['taxes']);
 
@@ -394,7 +394,7 @@ class InvoiceService
 
     public static function approve($id)
     {
-        $Txn = Invoice::with(['ledgers'])->findOrFail($id);
+        $Txn = Bill::with(['ledgers'])->findOrFail($id);
 
         if (!in_array($Txn->status, config('financial-accounting.approvable_status')))
         {
@@ -410,7 +410,7 @@ class InvoiceService
         try
         {
             $data['status'] = 'approved';
-            $invoiceApprovalService = InvoiceApprovalService::run($data);
+            $invoiceApprovalService = BillApprovalService::run($data);
 
             //update the status of the txn
             if ($invoiceApprovalService)

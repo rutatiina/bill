@@ -26,7 +26,7 @@ class CreateRgBillRecurringBillItemsTable extends Migration
 
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('bill_recurring_id');
+            $table->unsignedBigInteger('recurring_bill_id');
             $table->unsignedBigInteger('item_id')->nullable();
             $table->unsignedBigInteger('debit_financial_account_code')->nullable();
             $table->unsignedBigInteger('contact_id')->nullable();

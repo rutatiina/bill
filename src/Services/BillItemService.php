@@ -1,11 +1,11 @@
 <?php
 
-namespace Rutatiina\Invoice\Services;
+namespace Rutatiina\Bill\Services;
 
-use Rutatiina\Invoice\Models\InvoiceItem;
-use Rutatiina\Invoice\Models\InvoiceItemTax;
+use Rutatiina\Bill\Models\BillItem;
+use Rutatiina\Bill\Models\BillItemTax;
 
-class InvoiceItemService
+class BillItemService
 {
     public static $errors = [];
 
@@ -21,20 +21,20 @@ class InvoiceItemService
         //Save the items >> $data['items']
         foreach ($data['items'] as &$item)
         {
-            $item['invoice_id'] = $data['id'];
+            $item['bill_id'] = $data['id'];
 
             $itemTaxes = (is_array($item['taxes'])) ? $item['taxes'] : [] ;
             unset($item['taxes']);
 
-            $itemModel = InvoiceItem::create($item);
+            $itemModel = BillItem::create($item);
 
             foreach ($itemTaxes as $tax)
             {
                 //save the taxes attached to the item
-                $itemTax = new InvoiceItemTax;
+                $itemTax = new BillItemTax;
                 $itemTax->tenant_id = $item['tenant_id'];
-                $itemTax->invoice_id = $item['invoice_id'];
-                $itemTax->invoice_item_id = $itemModel->id;
+                $itemTax->bill_id = $item['bill_id'];
+                $itemTax->bill_item_id = $itemModel->id;
                 $itemTax->tax_code = $tax['code'];
                 $itemTax->amount = $tax['total'];
                 $itemTax->inclusive = $tax['inclusive'];

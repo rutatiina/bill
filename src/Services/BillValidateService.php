@@ -1,13 +1,13 @@
 <?php
 
-namespace Rutatiina\Invoice\Services;
+namespace Rutatiina\Bill\Services;
 
 use Illuminate\Support\Facades\Validator;
 use Rutatiina\Contact\Models\Contact;
-use Rutatiina\Invoice\Models\Setting;
+use Rutatiina\Bill\Models\BillSetting;
 use Rutatiina\Item\Models\Item;
 
-class InvoiceValidateService
+class BillValidateService
 {
     public static $errors = [];
 
@@ -57,7 +57,7 @@ class InvoiceValidateService
 
         // << data validation <<------------------------------------------------------------
 
-        $settings = Setting::has('financial_account_to_debit')
+        $settings = BillSetting::has('financial_account_to_debit')
             ->has('financial_account_to_credit')
             ->with(['financial_account_to_debit', 'financial_account_to_credit'])
             ->firstOrFail();

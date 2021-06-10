@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Rutatiina\Bill\Models\BillRecurringSetting;
+use Rutatiina\Bill\Models\RecurringBillSetting;
 use Rutatiina\FinancialAccounting\Traits\FinancialAccountingTrait;
 use Rutatiina\Item\Traits\ItemsVueSearchSelect;
 use Yajra\DataTables\Facades\DataTables;
 use Rutatiina\FinancialAccounting\Models\Account;
 
-class RecurringSettingController extends Controller
+class RecurringBillSettingController extends Controller
 {
     use FinancialAccountingTrait;
     use ItemsVueSearchSelect;

@@ -1,12 +1,10 @@
 <?php
 
-namespace Rutatiina\Invoice\Services;
+namespace Rutatiina\Bill\Services;
 
-use Rutatiina\Invoice\Models\InvoiceItem;
-use Rutatiina\Invoice\Models\InvoiceItemTax;
-use Rutatiina\Invoice\Models\InvoiceLedger;
+use Rutatiina\Bill\Models\BillLedger;
 
-class InvoiceLedgerService
+class BillLedgerService
 {
     public static $errors = [];
 
@@ -22,8 +20,8 @@ class InvoiceLedgerService
         //Save the items >> $data['items']
         foreach ($data['ledgers'] as &$ledger)
         {
-            $ledger['invoice_id'] = $data['id'];
-            InvoiceLedger::create($ledger);
+            $ledger['bill_id'] = $data['id'];
+            BillLedger::create($ledger);
         }
         unset($ledger);
 
