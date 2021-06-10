@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRgBillRecurringItemsTable extends Migration
+class CreateRgBillRecurringBillItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateRgBillRecurringItemsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('rg_bill_recurring_items', function (Blueprint $table) {
+        Schema::connection('tenant')->create('rg_bill_recurring_bill_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -27,19 +27,15 @@ class CreateRgBillRecurringItemsTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('bill_recurring_id');
-            $table->enum('type', ['item', 'contact', 'account', 'txn_type', 'txn', 'tax'])->nullable();
-            $table->unsignedBigInteger('type_id')->nullable();
+            $table->unsignedBigInteger('item_id')->nullable();
+            $table->unsignedBigInteger('debit_financial_account_code')->nullable();
             $table->unsignedBigInteger('contact_id')->nullable();
             $table->string('name', 100);
             $table->string('description', 250)->nullable();
             $table->unsignedInteger('quantity');
             $table->unsignedDecimal('rate', 20,5);
-            $table->unsignedBigInteger('tax_id')->nullable();
+            $table->unsignedDecimal('taxable_amount', 20, 5);
             $table->unsignedDecimal('total', 20, 5);
-            $table->unsignedInteger('units')->nullable();
-            $table->string('batch', 100)->nullable();
-            $table->date('expiry')->nullable();
-            $table->string('taxes', 100)->nullable();
 
         });
     }
@@ -51,6 +47,6 @@ class CreateRgBillRecurringItemsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('rg_bill_recurring_items');
+        Schema::connection('tenant')->dropIfExists('rg_bill_recurring_bill_items');
     }
 }

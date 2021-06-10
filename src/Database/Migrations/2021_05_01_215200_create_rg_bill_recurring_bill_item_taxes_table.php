@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRgBillRecurringLedgersTable extends Migration
+class CreateRgBillRecurringBillItemTaxesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateRgBillRecurringLedgersTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('rg_bill_recurring_ledgers', function (Blueprint $table) {
+        Schema::connection('tenant')->create('rg_bill_recurring_bill_item_taxes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -27,15 +27,12 @@ class CreateRgBillRecurringLedgersTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('bill_recurring_id');
-            $table->date('date');
-            $table->date('external_date');
-            $table->unsignedBigInteger('financial_account_code');
-            $table->enum('effect', ['debit', 'credit']);
-            $table->unsignedDecimal('total', 20, 5);
-            $table->string('base_currency', 3);
-            $table->string('quote_currency', 3);
-            $table->unsignedDecimal('exchange_rate', 20,5);
-            $table->unsignedBigInteger('contact_id');
+            $table->unsignedBigInteger('bill_recurring_item_id');
+            $table->char('tax_code', 50);
+            $table->unsignedDecimal('amount', 20,5);
+            $table->unsignedDecimal('inclusive', 20,5);
+            $table->unsignedDecimal('exclusive', 20,5);
+
         });
     }
 
@@ -46,6 +43,6 @@ class CreateRgBillRecurringLedgersTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('rg_bill_recurring_ledgers');
+        Schema::connection('tenant')->dropIfExists('rg_bill_recurring_bill_item_taxes');
     }
 }

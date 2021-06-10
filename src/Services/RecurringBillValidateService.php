@@ -115,15 +115,13 @@ class InvoiceRecurringValidateService
                 'created_by' => $data['created_by'],
                 'contact_id' => $item['contact_id'],
                 'item_id' => $item['item_id'],
+                'debit_financial_account_code' => $item['debit_financial_account_code'],
                 'name' => $item['name'],
                 'description' => $item['description'],
                 'quantity' => $item['quantity'],
                 'rate' => $item['rate'],
                 'total' => $item['total'],
                 'taxable_amount' => $itemTaxableAmount,
-                'units' => $requestInstance->input('items.'.$key.'.units', null),
-                'batch' => $requestInstance->input('items.'.$key.'.batch', null),
-                'expiry' => $requestInstance->input('items.'.$key.'.expiry', null),
                 'taxes' => $itemTaxes,
             ];
         }

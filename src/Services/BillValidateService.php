@@ -32,9 +32,7 @@ class InvoiceValidateService
             'contact_id' => 'required|numeric',
             'date' => 'required|date',
             'base_currency' => 'required',
-            'due_date' => 'date|nullable',
-            'salesperson_contact_id' => 'numeric|nullable',
-            'memo' => 'string|nullable',
+            'contact_notes' => 'string|nullable',
 
             'items' => 'required|array',
             'items.*.name' => 'required_without:item_id',

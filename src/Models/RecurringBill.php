@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 
-class BillRecurring extends Model
+class RecurringBill extends Model
 {
     use LogsActivity;
 
@@ -18,7 +18,7 @@ class BillRecurring extends Model
 
     protected $connection = 'tenant';
 
-    protected $table = 'rg_bill_recurrings';
+    protected $table = 'rg_bill_recurring_bills';
 
     protected $primaryKey = 'id';
 

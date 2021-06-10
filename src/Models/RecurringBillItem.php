@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 
-class BillRecurringLedger extends Model
+class RecurringBillItem extends Model
 {
     use LogsActivity;
 
-    protected static $logName = 'TxnLedger';
+    protected static $logName = 'TxnItem';
     protected static $logFillable = true;
     protected static $logAttributes = ['*'];
     protected static $logAttributesToIgnore = ['updated_at'];
@@ -18,7 +18,7 @@ class BillRecurringLedger extends Model
 
     protected $connection = 'tenant';
 
-    protected $table = 'rg_bill_recurring_ledgers';
+    protected $table = 'rg_bill_recurring_bill_items';
 
     protected $primaryKey = 'id';
 
@@ -36,7 +36,17 @@ class BillRecurringLedger extends Model
         static::addGlobalScope(new TenantIdScope);
     }
 
-    public function recurring_bill()
+    public function getTaxesAttribute($value)
+    {
+        $_array_ = json_decode($value);
+        if (is_array($_array_)) {
+            return $_array_;
+        } else {
+            return [];
+        }
+    }
+
+    public function recurringBill()
     {
         return $this->belongsTo('Rutatiina\Bill\Models\BillRecurring', 'bill_recurring_id');
     }

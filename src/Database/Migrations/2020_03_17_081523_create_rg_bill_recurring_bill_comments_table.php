@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRgBillRecurringItemTaxesTable extends Migration
+class CreateRgBillRecurringBillCommentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateRgBillRecurringItemTaxesTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('rg_bill_recurring_item_taxes', function (Blueprint $table) {
+        Schema::connection('tenant')->create('rg_bill_recurring_bill_comments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -27,12 +27,7 @@ class CreateRgBillRecurringItemTaxesTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('bill_recurring_id');
-            $table->unsignedBigInteger('bill_recurring_item_id');
-            $table->char('tax_code', 50);
-            $table->unsignedDecimal('amount', 20,5);
-            $table->unsignedDecimal('inclusive', 20,5);
-            $table->unsignedDecimal('exclusive', 20,5);
-
+            $table->string('comment', 250);
         });
     }
 
@@ -43,6 +38,6 @@ class CreateRgBillRecurringItemTaxesTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('rg_bill_recurring_item_taxes');
+        Schema::connection('tenant')->dropIfExists('rg_bill_recurring_bill_comments');
     }
 }
