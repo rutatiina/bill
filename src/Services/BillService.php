@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Rutatiina\Bill\Models\Bill;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
-use Rutatiina\Bill\Models\Setting;
+use Rutatiina\Bill\Models\BillSetting;
 use Rutatiina\Tax\Models\Tax;
 
 class BillService
