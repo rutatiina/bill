@@ -31,7 +31,6 @@ class CreateRgBillRecurringBillsTable extends Migration
             $table->string('number', 250);
             $table->date('date');
             $table->time('time');
-            $table->unsignedBigInteger('debit_financial_account_code')->nullable();
             $table->unsignedBigInteger('credit_financial_account_code')->nullable();
             $table->unsignedBigInteger('contact_id');
             $table->string('contact_name', 50);

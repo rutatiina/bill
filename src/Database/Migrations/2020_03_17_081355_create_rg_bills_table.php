@@ -26,23 +26,13 @@ class CreateRgBillsTable extends Migration
 
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('parent_id');
-            $table->string('external_key', 100);
             $table->unsignedBigInteger('app_id');
             $table->string('document_name', 50)->default('Bill');
-            $table->string('number_prefix', 50)->nullable();
-            $table->unsignedBigInteger('number');
-            $table->unsignedTinyInteger('number_length');
-            $table->string('number_postfix', 50)->nullable();
-            $table->string('internal_ref_document', 20);
-            $table->unsignedBigInteger('internal_ref_id');
-            $table->unsignedBigInteger('document_id');
+            $table->string('number', 250);
             $table->date('date');
             $table->time('time');
-            $table->unsignedBigInteger('debit_financial_account_code')->nullable();
             $table->unsignedBigInteger('credit_financial_account_code')->nullable();
-            $table->unsignedBigInteger('debit_contact_id');
-            $table->unsignedBigInteger('credit_contact_id');
+            $table->unsignedBigInteger('contact_id');
             $table->string('contact_name', 50);
             $table->string('contact_address', 50);
             $table->string('reference', 100)->nullable();
@@ -52,18 +42,15 @@ class CreateRgBillsTable extends Migration
             $table->unsignedDecimal('taxable_amount', 20,5);
             $table->unsignedDecimal('total', 20, 5);
             $table->unsignedDecimal('total_paid', 20, 5)->default(0);
+            $table->boolean('balances_where_updated')->default(0);
             $table->unsignedDecimal('discount_amount', 20, 5)->nullable();
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('store_id')->nullable();
             $table->date('due_date')->nullable();
-            $table->date('expiry_date')->nullable();
             $table->string('status', 20)->nullable();
             $table->unsignedTinyInteger('sent')->nullable();
-            $table->unsignedBigInteger('salesperson_id')->nullable();
-            $table->string('payment_mode', 50)->nullable();
             $table->string('payment_terms', 100)->nullable();
             $table->string('contact_notes', 250)->nullable();
-            $table->string('external_ref', 250)->nullable();
             $table->string('terms_and_conditions', 250)->nullable();
 
         });

@@ -68,6 +68,7 @@ class BillController extends Controller
         $txnAttributes['taxes'] = json_decode('{}');
         $txnAttributes['contact_notes'] = null;
         $txnAttributes['terms_and_conditions'] = null;
+        $txnAttributes['debit_financial_account'] = '';
         $txnAttributes['items'] = [[
             'selectedTaxes' => [], #required
             'selectedItem' => json_decode('{}'), #required
@@ -93,6 +94,8 @@ class BillController extends Controller
 
     public function store(Request $request)
     {
+        //return $request->items;
+
         $storeService = BillService::store($request);
 
         if ($storeService)
