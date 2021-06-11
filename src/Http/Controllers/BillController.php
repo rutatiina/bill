@@ -98,7 +98,7 @@ class BillController extends Controller
 
         $storeService = BillService::store($request);
 
-        if ($storeService)
+        if (!$storeService)
         {
             return [
                 'status' => false,
