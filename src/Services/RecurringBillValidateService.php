@@ -20,11 +20,11 @@ class RecurringBillValidateService
 
         //validate the data
         $customMessages = [
-            //'total.in' => "Item total is invalid:\nItem total = item rate x item quantity",
-
+            'items.*.debit_financial_account_code.required' => "The item account is required",
+            'items.*.debit_financial_account_code.numeric' => "The item account must be numeric",
+            'items.*.debit_financial_account_code.gt' => "The item account is required",
             'items.*.taxes.*.code.required' => "Tax code is required",
             'items.*.taxes.*.total.required' => "Tax total is required",
-            //'items.*.taxes.*.exclusive.required' => "Tax exclusive amount is required",
         ];
 
         $rules = [
@@ -41,6 +41,7 @@ class RecurringBillValidateService
             'items.*.quantity' => 'required|numeric|gt:0',
             //'items.*.total' => 'required|numeric|in:' . $itemTotal, //todo custom validator to check this
             'items.*.units' => 'numeric|nullable',
+            'items.*.debit_financial_account_code' => 'required|numeric|gt:0',
             'items.*.taxes' => 'array|nullable',
 
             'items.*.taxes.*.code' => 'required',
@@ -80,10 +81,10 @@ class RecurringBillValidateService
         $data['base_currency'] =  $requestInstance->input('base_currency');
         $data['quote_currency'] =  $requestInstance->input('quote_currency', $data['base_currency']);
         $data['exchange_rate'] = $requestInstance->input('exchange_rate', 1);
-        $data['salesperson_contact_id'] = $requestInstance->input('salesperson_contact_id', null);
         $data['branch_id'] = $requestInstance->input('branch_id', null);
         $data['store_id'] = $requestInstance->input('store_id', null);
         $data['due_date'] = $requestInstance->input('due_date', null);
+        $data['payment_terms'] = $requestInstance->input('payment_terms', null);
         $data['terms_and_conditions'] = $requestInstance->input('terms_and_conditions', null);
         $data['contact_notes'] = $requestInstance->input('contact_notes', null);
         $data['status'] = $requestInstance->input('status', null);

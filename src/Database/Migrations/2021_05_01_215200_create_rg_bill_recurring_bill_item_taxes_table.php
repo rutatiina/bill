@@ -26,8 +26,8 @@ class CreateRgBillRecurringBillItemTaxesTable extends Migration
 
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('bill_recurring_id');
-            $table->unsignedBigInteger('bill_recurring_item_id');
+            $table->unsignedBigInteger('recurring_bill_id');
+            $table->unsignedBigInteger('recurring_bill_item_id');
             $table->char('tax_code', 50);
             $table->unsignedDecimal('amount', 20,5);
             $table->unsignedDecimal('inclusive', 20,5);

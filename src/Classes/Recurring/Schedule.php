@@ -32,7 +32,7 @@ class Schedule
         //$number = $settings->number_prefix.(str_pad((optional($txn)->number+1), $settings->minimum_number_length, "0", STR_PAD_LEFT)).$settings->number_postfix;
 
         $TxnCopy = new RecurringBillCopy();
-        $txnAttributes = $TxnCopy->run($task->bill_recurring_id);
+        $txnAttributes = $TxnCopy->run($task->recurring_bill_id);
         $txnAttributes['number'] = (optional($txn)->number+1);
         //Log::info('doc number #'.$txnAttributes['number']);
 

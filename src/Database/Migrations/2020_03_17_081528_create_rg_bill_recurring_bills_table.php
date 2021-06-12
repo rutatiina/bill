@@ -27,6 +27,7 @@ class CreateRgBillRecurringBillsTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('app_id');
+            $table->string('profile_name', 250); //name of the recurring invoice
             $table->string('document_name', 50)->default('Bill'); //todo >> i dont think this field is needed
             $table->string('number', 250);
             $table->date('date');
@@ -47,6 +48,7 @@ class CreateRgBillRecurringBillsTable extends Migration
             $table->date('end_date')->nullable();
             $table->string('status', 20)->nullable();
             $table->unsignedTinyInteger('sent')->nullable();
+            $table->string('payment_terms', 100)->nullable();
             $table->string('contact_notes', 250)->nullable();
             $table->string('terms_and_conditions', 250)->nullable();
 

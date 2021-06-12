@@ -81,7 +81,7 @@ class BillController extends Controller
             'taxes' => [],
             'item_id' => '',
             'contact_id' => '',
-            'debit_financial_account_code' => 0,
+            'debit_financial_account_code' => null,
         ]];
 
         return [
@@ -182,8 +182,8 @@ class BillController extends Controller
         {
             return [
                 'status' => true,
-                'messages' => ['Invoice deleted'],
-                'callback' => URL::route('invoices.index', [], false)
+                'messages' => ['Bill deleted'],
+                'callback' => URL::route('bills.index', [], false)
             ];
         }
         else

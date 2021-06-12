@@ -53,7 +53,7 @@ class RecurringBillItemTax extends Model
 
     public function bill_recurring()
     {
-        return $this->belongsTo('Rutatiina\BillRecurring\Models\BillRecurring', 'bill_recurring_id', 'id');
+        return $this->belongsTo('Rutatiina\BillRecurring\Models\BillRecurring', 'recurring_bill_id', 'id');
     }
 
     public function bill_recurring_item()

@@ -9,9 +9,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Rutatiina\Bill\Models\RecurringBill;
 use Rutatiina\Bill\Services\RecurringBillService;
+use Rutatiina\FinancialAccounting\Traits\RecurringTrait;
 
 class RecurringBillController extends Controller
 {
+    use RecurringTrait;
+
     public function __construct()
     {
         $this->middleware('permission:recurring-bills.view');
@@ -134,8 +137,10 @@ class RecurringBillController extends Controller
             'number_string',
             'total_in_words',
         ]);
+        $response = $txn->toArray();
+        $response['propertiesOptions'] = $this->propertiesOptions();
 
-        return $txn->toArray();
+        return $response;
     }
 
     public function edit($id)

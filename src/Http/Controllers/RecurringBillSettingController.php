@@ -18,8 +18,6 @@ class RecurringBillSettingController extends Controller
     use FinancialAccountingTrait;
     use ItemsVueSearchSelect;
 
-    private  $txnEntreeSlug = 'offer';
-
     public function __construct()
     {
 		$this->middleware('permission:estimates.view');
@@ -37,7 +35,7 @@ class RecurringBillSettingController extends Controller
 
         return [
             'financial_accounts' => Account::all(),
-            'settings' => BillRecurringSetting::first()
+            'settings' => RecurringBillSetting::first()
         ];
     }
 
@@ -65,7 +63,7 @@ class RecurringBillSettingController extends Controller
         }
 
         //save data posted
-        $settings = BillRecurringSetting::first();
+        $settings = RecurringBillSetting::first();
         $settings->document_name = $request->document_name;
         $settings->number_prefix = $request->number_prefix;
         $settings->number_postfix = $request->number_postfix;

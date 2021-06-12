@@ -32,13 +32,12 @@ class RecurringBillService
 
         $attributes['_method'] = 'PATCH';
 
-        $attributes['contact_id'] = $attributes['debit_contact_id'];
         $attributes['contact']['currency'] = $attributes['contact']['currency_and_exchange_rate'];
         $attributes['contact']['currencies'] = $attributes['contact']['currencies_and_exchange_rates'];
 
         $attributes['taxes'] = json_decode('{}');
 
-        foreach ($attributes['items'] as $key => $item)
+        foreach ($attributes['items'] as $key => &$item)
         {
             $selectedItem = [
                 'id' => $item['item_id'],
@@ -49,20 +48,21 @@ class RecurringBillService
                 'account_type' => null,
             ];
 
-            $attributes['items'][$key]['selectedItem'] = $selectedItem; #required
-            $attributes['items'][$key]['selectedTaxes'] = []; #required
-            $attributes['items'][$key]['displayTotal'] = 0; #required
+            $item['selectedItem'] = $selectedItem; #required
+            $item['selectedTaxes'] = []; #required
+            $item['displayTotal'] = 0; #required
 
             foreach ($item['taxes'] as $itemTax)
             {
-                $attributes['items'][$key]['selectedTaxes'][] = $taxes[$itemTax['tax_code']];
+                $item['selectedTaxes'][] = $taxes[$itemTax['tax_code']];
             }
 
-            $attributes['items'][$key]['rate'] = floatval($item['rate']);
-            $attributes['items'][$key]['quantity'] = floatval($item['quantity']);
-            $attributes['items'][$key]['total'] = floatval($item['total']);
-            $attributes['items'][$key]['displayTotal'] = $item['total']; #required
+            $item['rate'] = floatval($item['rate']);
+            $item['quantity'] = floatval($item['quantity']);
+            $item['total'] = floatval($item['total']);
+            $item['displayTotal'] = $item['total']; #required
         };
+        unset($item);
 
         return $attributes;
     }
@@ -99,6 +99,7 @@ class RecurringBillService
             $Txn->store_id = $data['store_id'];
             $Txn->start_date = $data['recurring']['start_date'];
             $Txn->end_date = $data['recurring']['end_date'];
+            $Txn->payment_terms = $data['payment_terms'];
             $Txn->contact_notes = $data['contact_notes'];
             $Txn->terms_and_conditions = $data['terms_and_conditions'];
             $Txn->status = $data['status'];
@@ -190,6 +191,7 @@ class RecurringBillService
             $Txn->store_id = $data['store_id'];
             $Txn->start_date = $data['recurring']['start_date'];
             $Txn->end_date = $data['recurring']['end_date'];
+            $Txn->payment_terms = $data['payment_terms'];
             $Txn->contact_notes = $data['contact_notes'];
             $Txn->terms_and_conditions = $data['terms_and_conditions'];
             $Txn->status = $data['status'];
@@ -309,7 +311,7 @@ class RecurringBillService
         $attributes['contact_id'] = $attributes['debit_contact_id'];
         $attributes['taxes'] = json_decode('{}');
 
-        foreach ($attributes['items'] as $key => $item)
+        foreach ($attributes['items'] as $key => &$item)
         {
             $selectedItem = [
                 'id' => $item['item_id'],
@@ -320,19 +322,20 @@ class RecurringBillService
                 'account_type' => null,
             ];
 
-            $attributes['items'][$key]['selectedItem'] = $selectedItem; #required
-            $attributes['items'][$key]['selectedTaxes'] = []; #required
-            $attributes['items'][$key]['displayTotal'] = 0; #required
-            $attributes['items'][$key]['rate'] = floatval($item['rate']);
-            $attributes['items'][$key]['quantity'] = floatval($item['quantity']);
-            $attributes['items'][$key]['total'] = floatval($item['total']);
-            $attributes['items'][$key]['displayTotal'] = $item['total']; #required
+            $item['selectedItem'] = $selectedItem; #required
+            $item['selectedTaxes'] = []; #required
+            $item['displayTotal'] = 0; #required
+            $item['rate'] = floatval($item['rate']);
+            $item['quantity'] = floatval($item['quantity']);
+            $item['total'] = floatval($item['total']);
+            $item['displayTotal'] = $item['total']; #required
 
             foreach ($item['taxes'] as $itemTax)
             {
-                $attributes['items'][$key]['selectedTaxes'][] = $taxes[$itemTax['tax_code']];
+                $item['selectedTaxes'][] = $taxes[$itemTax['tax_code']];
             }
         };
+        unset($item);
 
         return $attributes;
     }

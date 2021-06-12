@@ -26,7 +26,7 @@ class CreateRgBillRecurringBillCommentsTable extends Migration
 
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('bill_recurring_id');
+            $table->unsignedBigInteger('recurring_bill_id');
             $table->string('comment', 250);
         });
     }

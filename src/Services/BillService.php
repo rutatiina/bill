@@ -43,7 +43,6 @@ class BillService
 
         $attributes['_method'] = 'PATCH';
 
-        $attributes['contact_id'] = $attributes['debit_contact_id'];
         $attributes['contact']['currency'] = $attributes['contact']['currency_and_exchange_rate'];
         $attributes['contact']['currencies'] = $attributes['contact']['currencies_and_exchange_rates'];
 
@@ -96,12 +95,11 @@ class BillService
             $Txn = new Bill;
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
-            $Txn->document_name = $data['document_name'];
+            //$Txn->document_name = $data['document_name'];
             $Txn->number = $data['number'];
             $Txn->date = $data['date'];
-            $Txn->debit_financial_account_code = $data['debit_financial_account_code'];
-            $Txn->debit_contact_id = $data['debit_contact_id'];
-            $Txn->credit_contact_id = $data['credit_contact_id'];
+            $Txn->credit_financial_account_code = $data['credit_financial_account_code'];
+            $Txn->contact_id = $data['contact_id'];
             $Txn->contact_name = $data['contact_name'];
             $Txn->contact_address = $data['contact_address'];
             $Txn->reference = $data['reference'];
@@ -208,12 +206,11 @@ class BillService
 
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
-            $Txn->document_name = $data['document_name'];
+            //$Txn->document_name = $data['document_name'];
             $Txn->number = $data['number'];
             $Txn->date = $data['date'];
-            $Txn->debit_financial_account_code = $data['debit_financial_account_code'];
-            $Txn->debit_contact_id = $data['debit_contact_id'];
-            $Txn->credit_contact_id = $data['credit_contact_id'];
+            $Txn->credit_financial_account_code = $data['credit_financial_account_code'];
+            $Txn->contact_id = $data['contact_id'];
             $Txn->contact_name = $data['contact_name'];
             $Txn->contact_address = $data['contact_address'];
             $Txn->reference = $data['reference'];

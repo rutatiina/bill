@@ -35,7 +35,6 @@ class RecurringBill extends Model
     ];
     protected $appends = [
         'total_in_words',
-        'contact_id',
     ];
 
     /**
@@ -91,8 +90,6 @@ class RecurringBill extends Model
         $attributes['items'] = [];
         $attributes['ledgers'] = [];
         $attributes['comments'] = [];
-        $attributes['debit_contact'] = [];
-        $attributes['credit_contact'] = [];
         $attributes['recurring'] = [];
 
         return $attributes;
@@ -114,18 +111,6 @@ class RecurringBill extends Model
         return ucfirst($f->format($this->total));
     }
 
-    public function getContactIdAttribute()
-    {
-        if ($this->debit_contact_id == $this->credit_contact_id)
-        {
-            return $this->debit_contact_id;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     public function debit_account()
     {
         return $this->hasOne('Rutatiina\FinancialAccounting\Models\Account', 'id', 'debit');
@@ -138,42 +123,27 @@ class RecurringBill extends Model
 
     public function items()
     {
-        return $this->hasMany('Rutatiina\Bill\Models\BillRecurringItem', 'bill_recurring_id')->orderBy('id', 'asc');
-    }
-
-    public function ledgers()
-    {
-        return $this->hasMany('Rutatiina\Bill\Models\BillRecurringLedger', 'bill_recurring_id')->orderBy('id', 'asc');
+        return $this->hasMany('Rutatiina\Bill\Models\RecurringBillItem', 'recurring_bill_id')->orderBy('id', 'asc');
     }
 
     public function comments()
     {
-        return $this->hasMany('Rutatiina\Bill\Models\BillRecurringComment', 'bill_recurring_id')->latest();
+        return $this->hasMany('Rutatiina\Bill\Models\RecurringBillComment', 'recurring_bill_id')->latest();
     }
 
     public function contact()
     {
-        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'debit_contact_id');
+        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'contact_id');
     }
 
-    public function debit_contact()
+    public function properties()
     {
-        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'debit_contact_id');
-    }
-
-    public function credit_contact()
-    {
-        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'credit_contact_id');
-    }
-
-    public function recurring()
-    {
-        return $this->hasOne('Rutatiina\Bill\Models\BillRecurringProperties', 'bill_recurring_id', 'id');
+        return $this->hasOne('Rutatiina\Bill\Models\RecurringBillProperty', 'recurring_bill_id', 'id');
     }
 
     public function item_taxes()
     {
-        return $this->hasMany('Rutatiina\Bill\Models\BillRecurringItemTax', 'bill_recurring_id', 'id');
+        return $this->hasMany('Rutatiina\Bill\Models\RecurringBillItemTax', 'recurring_bill_id', 'id');
     }
 
     public function getTaxesAttribute()

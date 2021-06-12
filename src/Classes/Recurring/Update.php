@@ -123,7 +123,7 @@ class Update
 
             foreach ($this->txn['items'] as &$item)
             {
-                $item['bill_recurring_id'] = $txnId;
+                $item['recurring_bill_id'] = $txnId;
             }
 
             unset($item);
@@ -132,7 +132,7 @@ class Update
 
             foreach ($this->txn['ledgers'] as &$ledger)
             {
-                $ledger['bill_recurring_id'] = $txnId;
+                $ledger['recurring_bill_id'] = $txnId;
             }
             unset($ledger);
 

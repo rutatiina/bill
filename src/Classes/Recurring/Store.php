@@ -96,7 +96,7 @@ class Store
             //Save the items >> $this->txn['items']
             foreach ($this->txn['items'] as &$item)
             {
-                $item['bill_recurring_id'] = $this->txn['id'];
+                $item['recurring_bill_id'] = $this->txn['id'];
 
                 $itemTaxes = (is_array($item['taxes'])) ? $item['taxes'] : [] ;
                 unset($item['taxes']);
@@ -108,7 +108,7 @@ class Store
                     //save the taxes attached to the item
                     $itemTax = new BillRecurringItemTax;
                     $itemTax->tenant_id = $item['tenant_id'];
-                    $itemTax->bill_recurring_id = $item['bill_recurring_id'];
+                    $itemTax->recurring_bill_id = $item['recurring_bill_id'];
                     $itemTax->bill_recurring_item_id = $itemModel->id;
                     $itemTax->tax_code = $tax['code'];
                     $itemTax->amount = $tax['total'];
@@ -128,7 +128,7 @@ class Store
             //save transaction recurring details
             $TxnRecurring = new BillRecurringProperties;
             $TxnRecurring->tenant_id = $this->txn['tenant_id'];
-            $TxnRecurring->bill_recurring_id = $this->txn['id'];
+            $TxnRecurring->recurring_bill_id = $this->txn['id'];
             $TxnRecurring->status = $this->txn['recurring']['status'];
             $TxnRecurring->frequency = $this->txn['recurring']['frequency'];
             //$TxnRecurring->measurement = $this->txn['recurring']['frequency']; //of no use

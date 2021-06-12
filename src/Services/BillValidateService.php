@@ -21,11 +21,11 @@ class BillValidateService
 
         //validate the data
         $customMessages = [
-            //'total.in' => "Item total is invalid:\nItem total = item rate x item quantity",
-
+            'items.*.debit_financial_account_code.required' => "The item account is required",
+            'items.*.debit_financial_account_code.numeric' => "The item account must be numeric",
+            'items.*.debit_financial_account_code.gt' => "The item account is required",
             'items.*.taxes.*.code.required' => "Tax code is required",
             'items.*.taxes.*.total.required' => "Tax total is required",
-            //'items.*.taxes.*.exclusive.required' => "Tax exclusive amount is required",
         ];
 
         $rules = [
@@ -40,8 +40,8 @@ class BillValidateService
             'items.*.quantity' => 'required|numeric|gt:0',
             //'items.*.total' => 'required|numeric|in:' . $itemTotal, //todo custom validator to check this
             'items.*.units' => 'numeric|nullable',
+            'items.*.debit_financial_account_code' => 'required|numeric|gt:0',
             'items.*.taxes' => 'array|nullable',
-
             'items.*.taxes.*.code' => 'required',
             'items.*.taxes.*.total' => 'required|numeric',
             //'items.*.taxes.*.exclusive' => 'required|numeric',
@@ -78,16 +78,14 @@ class BillValidateService
         $data['number_length'] = $settings->minimum_number_length;
         $data['number_postfix'] = $settings->number_postfix;
         $data['date'] = $requestInstance->input('date');
-        $data['debit_financial_account_code'] = $settings->financial_account_to_debit->code;
-        $data['debit_contact_id'] = $requestInstance->contact_id;
-        $data['credit_contact_id'] = $requestInstance->contact_id;
+        $data['credit_financial_account_code'] = $settings->financial_account_to_credit->code;
+        $data['contact_id'] = $requestInstance->contact_id;
         $data['contact_name'] = $contact->name;
         $data['contact_address'] = trim($contact->shipping_address_street1 . ' ' . $contact->shipping_address_street2);
         $data['reference'] = $requestInstance->input('reference', null);
         $data['base_currency'] =  $requestInstance->input('base_currency');
         $data['quote_currency'] =  $requestInstance->input('quote_currency', $data['base_currency']);
         $data['exchange_rate'] = $requestInstance->input('exchange_rate', 1);
-        $data['salesperson_contact_id'] = $requestInstance->input('salesperson_contact_id', null);
         $data['branch_id'] = $requestInstance->input('branch_id', null);
         $data['store_id'] = $requestInstance->input('store_id', null);
         $data['due_date'] = $requestInstance->input('due_date', null);
@@ -122,14 +120,14 @@ class BillValidateService
             $itemModel = Item::find($item['item_id']);
 
             //use item selling_financial_account_code if available and default if not
-            $financialAccountToCredit = ($itemModel) ? $itemModel->selling_financial_account_code : $settings->financial_account_to_credit->code;
+            $financialAccountToDebit = $item['debit_financial_account_code'];
 
             $data['items'][] = [
                 'tenant_id' => $data['tenant_id'],
                 'created_by' => $data['created_by'],
                 'contact_id' => $item['contact_id'],
                 'item_id' => $item['item_id'],
-                'credit_financial_account_code' => $financialAccountToCredit,
+                'debit_financial_account_code' => $financialAccountToDebit,
                 'name' => $item['name'],
                 'description' => $item['description'],
                 'quantity' => $item['quantity'],
@@ -144,22 +142,22 @@ class BillValidateService
 
 
             //CR ledger
-            $data['ledgers'][$financialAccountToCredit]['financial_account_code'] = $financialAccountToCredit;
-            $data['ledgers'][$financialAccountToCredit]['effect'] = 'credit';
-            $data['ledgers'][$financialAccountToCredit]['total'] = @$data['ledgers'][$financialAccountToCredit]['total'] + $taxableAmount;
-            $data['ledgers'][$financialAccountToCredit]['contact_id'] = $data['debit_contact_id'];
+            $data['ledgers'][$financialAccountToDebit]['financial_account_code'] = $financialAccountToDebit;
+            $data['ledgers'][$financialAccountToDebit]['effect'] = 'debit';
+            $data['ledgers'][$financialAccountToDebit]['total'] = @$data['ledgers'][$financialAccountToDebit]['total'] + $taxableAmount;
+            $data['ledgers'][$financialAccountToDebit]['contact_id'] = $data['contact_id'];
         }
 
         $data['taxable_amount'] = $taxableAmount;
         $data['total'] = $txnTotal;
 
 
-        //DR ledger
+        //CR ledger
         $data['ledgers'][] = [
-            'financial_account_code' => $settings->financial_account_to_debit->code,
-            'effect' => 'debit',
+            'financial_account_code' => $settings->financial_account_to_credit->code,
+            'effect' => 'credit',
             'total' => $data['total'],
-            'contact_id' => $data['debit_contact_id']
+            'contact_id' => $data['contact_id']
         ];
 
         //print_r($data['ledgers']); exit;
