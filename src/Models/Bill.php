@@ -172,11 +172,6 @@ class Bill extends Model
         return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'contact_id');
     }
 
-    public function recurring()
-    {
-        return $this->hasOne('Rutatiina\Bill\Models\BillRecurring', 'bill_id', 'id');
-    }
-
     public function annexes()
     {
         return $this->hasMany('Rutatiina\Bill\Models\Annex', 'bill_id', 'id');
