@@ -78,7 +78,6 @@ class RecurringBillValidateService
         $data['contact_id'] = $requestInstance->contact_id;
         $data['contact_name'] = $contact->name;
         $data['contact_address'] = trim($contact->shipping_address_street1 . ' ' . $contact->shipping_address_street2);
-        $data['reference'] = $requestInstance->input('reference', null);
         $data['base_currency'] =  $requestInstance->input('base_currency');
         $data['quote_currency'] =  $requestInstance->input('quote_currency', $data['base_currency']);
         $data['exchange_rate'] = $requestInstance->input('exchange_rate', 1);
