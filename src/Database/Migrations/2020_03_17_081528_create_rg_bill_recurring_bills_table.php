@@ -30,8 +30,6 @@ class CreateRgBillRecurringBillsTable extends Migration
             $table->string('profile_name', 250); //name of the recurring invoice
             $table->string('document_name', 50)->default('Bill'); //todo >> i dont think this field is needed
             $table->string('number', 250);
-            $table->date('date');
-            $table->time('time');
             $table->unsignedBigInteger('credit_financial_account_code')->nullable();
             $table->unsignedBigInteger('contact_id');
             $table->string('contact_name', 50);
@@ -44,13 +42,18 @@ class CreateRgBillRecurringBillsTable extends Migration
             $table->unsignedDecimal('total', 20, 5);
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('store_id')->nullable();
+            $table->string('payment_terms', 100)->nullable();
+
+            //>> recurring details columns
+            $table->string('status', 20)->nullable(); //active | paused | de-active
+            $table->string('frequency', 50)->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->string('status', 20)->nullable();
-            $table->unsignedTinyInteger('sent')->nullable();
-            $table->string('payment_terms', 100)->nullable();
-            $table->string('contact_notes', 250)->nullable();
-            $table->string('terms_and_conditions', 250)->nullable();
+            $table->string('cron_day_of_month', 10)->nullable();
+            $table->string('cron_month', 10)->nullable();
+            $table->string('cron_day_of_week', 10)->nullable();
+            $table->dateTime('last_run')->nullable()->comment('date time of last run');
+            $table->dateTime('next_run')->nullable()->comment('date time of next run');
 
         });
     }

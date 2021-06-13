@@ -35,6 +35,8 @@ class RecurringBill extends Model
     ];
     protected $appends = [
         'total_in_words',
+        'date_range',
+        'is_recurring',
     ];
 
     /**
@@ -50,12 +52,6 @@ class RecurringBill extends Model
 
         self::deleting(function($txn) { // before delete() method call this
              $txn->items()->each(function($row) {
-                $row->delete();
-             });
-             $txn->comments()->each(function($row) {
-                $row->delete();
-             });
-             $txn->ledgers()->each(function($row) {
                 $row->delete();
              });
         });
@@ -84,13 +80,11 @@ class RecurringBill extends Model
         }
 
         //add the relationships
-        $attributes['type'] = [];
-        $attributes['debit_account'] = [];
-        $attributes['credit_account'] = [];
+        $attributes['is_recurring'] = true; //used by vue for displaying recurring form options
+        $attributes['date_range'] = []; //used by vue for the recurring date range
         $attributes['items'] = [];
         $attributes['ledgers'] = [];
         $attributes['comments'] = [];
-        $attributes['recurring'] = [];
 
         return $attributes;
     }
@@ -111,14 +105,14 @@ class RecurringBill extends Model
         return ucfirst($f->format($this->total));
     }
 
-    public function debit_account()
+    public function getIsRecurringAttribute()
     {
-        return $this->hasOne('Rutatiina\FinancialAccounting\Models\Account', 'id', 'debit');
+        return true;
     }
 
-    public function credit_account()
+    public function getDateRangeAttribute()
     {
-        return $this->hasOne('Rutatiina\FinancialAccounting\Models\Account', 'id', 'credit');
+        return [$this->start_date, $this->end_date];
     }
 
     public function items()
@@ -126,19 +120,9 @@ class RecurringBill extends Model
         return $this->hasMany('Rutatiina\Bill\Models\RecurringBillItem', 'recurring_bill_id')->orderBy('id', 'asc');
     }
 
-    public function comments()
-    {
-        return $this->hasMany('Rutatiina\Bill\Models\RecurringBillComment', 'recurring_bill_id')->latest();
-    }
-
     public function contact()
     {
         return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'contact_id');
-    }
-
-    public function properties()
-    {
-        return $this->hasOne('Rutatiina\Bill\Models\RecurringBillProperty', 'recurring_bill_id', 'id');
     }
 
     public function item_taxes()

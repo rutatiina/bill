@@ -62,21 +62,9 @@ class RecurringBillController extends Controller
 
         $txnAttributes['status'] = 'approved';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
-        $txnAttributes['date'] = date('Y-m-d');
         $txnAttributes['base_currency'] = $tenant->base_currency;
         $txnAttributes['quote_currency'] = $tenant->base_currency;
         $txnAttributes['taxes'] = json_decode('{}');
-        $txnAttributes['isRecurring'] = true;
-        $txnAttributes['recurring'] = [
-            'status' => 'active',
-            'frequency' => 'monthly',
-            'date_range' => [], //used by vue
-            'start_date' => '',
-            'end_date' => '',
-            'day_of_month' => '*',
-            'month' => '*',
-            'day_of_week' => '*',
-        ];
         $txnAttributes['contact_notes'] = null;
         $txnAttributes['terms_and_conditions'] = null;
         $txnAttributes['items'] = [[
@@ -131,7 +119,7 @@ class RecurringBillController extends Controller
         }
 
         $txn = RecurringBill::findOrFail($id);
-        $txn->load('contact', 'properties', 'items.taxes');
+        $txn->load('contact', 'items.taxes');
         $txn->setAppends([
             'taxes',
             'number_string',

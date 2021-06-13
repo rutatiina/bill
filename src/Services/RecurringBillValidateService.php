@@ -20,6 +20,10 @@ class RecurringBillValidateService
 
         //validate the data
         $customMessages = [
+            'con_day_of_month.required_if' => "The day of month to recurr is required",
+            'con_month.required_if' => "The month to recurr is required",
+            'con_day_of_week.required_if' => "The day of week to recurr is required",
+
             'items.*.debit_financial_account_code.required' => "The item account is required",
             'items.*.debit_financial_account_code.numeric' => "The item account must be numeric",
             'items.*.debit_financial_account_code.gt' => "The item account is required",
@@ -30,30 +34,27 @@ class RecurringBillValidateService
         $rules = [
             'profile_name' => 'required|string|max:250',
             'contact_id' => 'required|numeric',
-            'date' => 'required|date',
             'base_currency' => 'required',
-            'salesperson_contact_id' => 'numeric|nullable',
-            'memo' => 'string|nullable',
 
-            'items' => 'required|array',
-            'items.*.name' => 'required_without:type_id',
-            'items.*.rate' => 'required|numeric',
-            'items.*.quantity' => 'required|numeric|gt:0',
-            //'items.*.total' => 'required|numeric|in:' . $itemTotal, //todo custom validator to check this
-            'items.*.units' => 'numeric|nullable',
-            'items.*.debit_financial_account_code' => 'required|numeric|gt:0',
-            'items.*.taxes' => 'array|nullable',
+            'frequency' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'con_day_of_month' => 'required_if:frequency,custom|string',
+            'con_month' => 'required_if:frequency,custom|string',
+            'con_day_of_week' => 'required_if:frequency,custom|string',
 
-            'items.*.taxes.*.code' => 'required',
-            'items.*.taxes.*.total' => 'required|numeric',
+            'items' => 'bail|required|array',
+            'items.*.name' => 'bail|required',
+            'items.*.rate' => 'bail|required|numeric',
+            'items.*.quantity' => 'bail|required|numeric|gt:0',
+            //'items.*.total' => 'bail|required|numeric|in:' . $itemTotal, //todo custom validator to check this
+            'items.*.units' => 'bail|numeric|nullable',
+            'items.*.debit_financial_account_code' => 'bail|required|numeric|gt:0',
+            'items.*.taxes' => 'bail|array|nullable',
+
+            'items.*.taxes.*.code' => 'bail|required',
+            'items.*.taxes.*.total' => 'bail|required|numeric',
             //'items.*.taxes.*.exclusive' => 'required|numeric',
-
-            'recurring.frequency' => 'required|string',
-            'recurring.start_date' => 'required|date',
-            'recurring.end_date' => 'required|date',
-            'recurring.day_of_month' => 'required|string',
-            'recurring.month' => 'required|string',
-            'recurring.day_of_week' => 'required|string',
         ];
 
         $validator = Validator::make($requestInstance->all(), $rules, $customMessages);
@@ -85,9 +86,14 @@ class RecurringBillValidateService
         $data['store_id'] = $requestInstance->input('store_id', null);
         $data['due_date'] = $requestInstance->input('due_date', null);
         $data['payment_terms'] = $requestInstance->input('payment_terms', null);
-        $data['terms_and_conditions'] = $requestInstance->input('terms_and_conditions', null);
-        $data['contact_notes'] = $requestInstance->input('contact_notes', null);
+
         $data['status'] = $requestInstance->input('status', null);
+        $data['frequency'] = $requestInstance->input('frequency', null);
+        $data['start_date'] = $requestInstance->input('start_date', null);
+        $data['end_date'] = $requestInstance->input('end_date', null);
+        $data['cron_day_of_month'] = $requestInstance->input('cron_day_of_month', null);
+        $data['cron_month'] = $requestInstance->input('cron_month', null);
+        $data['cron_day_of_week'] = $requestInstance->input('cron_day_of_week', null);
 
 
         //set the transaction total to zero
@@ -130,7 +136,6 @@ class RecurringBillValidateService
         $data['taxable_amount'] = $taxableAmount;
         $data['total'] = $txnTotal;
 
-        $data['recurring']  = $requestInstance->input('recurring', []);
 
         //print_r($data); exit;
 

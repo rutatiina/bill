@@ -24,7 +24,7 @@ class RecurringBillService
 
         $txn = RecurringBill::findOrFail($id);
         $txn->load('contact', 'items.taxes');
-        $txn->setAppends(['taxes']);
+        $txn->setAppends(['taxes', 'date_range', 'is_recurring']);
 
         $attributes = $txn->toArray();
 
@@ -97,12 +97,15 @@ class RecurringBillService
             $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->start_date = $data['recurring']['start_date'];
-            $Txn->end_date = $data['recurring']['end_date'];
             $Txn->payment_terms = $data['payment_terms'];
-            $Txn->contact_notes = $data['contact_notes'];
-            $Txn->terms_and_conditions = $data['terms_and_conditions'];
+
             $Txn->status = $data['status'];
+            $Txn->frequency = $data['frequency'];
+            $Txn->start_date = $data['start_date'];
+            $Txn->end_date = $data['end_date'];
+            $Txn->cron_day_of_month = $data['cron_day_of_month'];
+            $Txn->cron_month = $data['cron_month'];
+            $Txn->cron_day_of_week = $data['cron_day_of_week'];
 
             $Txn->save();
 
@@ -112,8 +115,6 @@ class RecurringBillService
 
             //Save the items >> $data['items']
             RecurringBillItemService::store($data);
-
-            RecurringBillPropertyService::store($data);
 
             DB::connection('tenant')->commit();
 
@@ -161,7 +162,7 @@ class RecurringBillService
 
         try
         {
-            $Txn = RecurringBill::with('items', 'ledgers')->findOrFail($data['id']);
+            $Txn = RecurringBill::with('items')->findOrFail($data['id']);
 
             if ($Txn->status == 'approved')
             {
@@ -170,10 +171,8 @@ class RecurringBillService
             }
 
             //Delete affected relations
-            $Txn->properties()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
-            $Txn->comments()->delete();
 
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
@@ -189,12 +188,15 @@ class RecurringBillService
             $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->start_date = $data['recurring']['start_date'];
-            $Txn->end_date = $data['recurring']['end_date'];
             $Txn->payment_terms = $data['payment_terms'];
-            $Txn->contact_notes = $data['contact_notes'];
-            $Txn->terms_and_conditions = $data['terms_and_conditions'];
+
             $Txn->status = $data['status'];
+            $Txn->frequency = $data['frequency'];
+            $Txn->start_date = $data['start_date'];
+            $Txn->end_date = $data['end_date'];
+            $Txn->cron_day_of_month = $data['cron_day_of_month'];
+            $Txn->cron_month = $data['cron_month'];
+            $Txn->cron_day_of_week = $data['cron_day_of_week'];
 
             $Txn->save();
 
@@ -204,8 +206,6 @@ class RecurringBillService
 
             //Save the items >> $data['items']
             RecurringBillItemService::store($data);
-
-            RecurringBillPropertyService::store($data);
 
             DB::connection('tenant')->commit();
 
@@ -253,10 +253,8 @@ class RecurringBillService
             }
 
             //Delete affected relations
-            $Txn->properties()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
-            $Txn->comments()->delete();
 
             $Txn->delete();
 
@@ -269,20 +267,20 @@ class RecurringBillService
         {
             DB::connection('tenant')->rollBack();
 
-            Log::critical('Fatal Internal Error: Failed to delete estimate from database');
+            Log::critical('Fatal Internal Error: Failed to delete recurrinf bill from database');
             Log::critical($e);
 
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'Error: Failed to delete estimate from database.';
+                self::$errors[] = 'Error: Failed to delete recurring bill from database.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to delete estimate from database. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to delete recurring bill from database. Please contact Admin';
             }
 
             return false;
@@ -295,20 +293,21 @@ class RecurringBillService
 
         $txn = RecurringBill::findOrFail($id);
         $txn->load('contact', 'items.taxes');
-        $txn->setAppends(['taxes']);
+        $txn->setAppends(['taxes', 'date_range', 'is_recurring']);
 
         $attributes = $txn->toArray();
+
+        $attributes['isRecurring'] = true;
 
         #reset some values
         $attributes['date'] = date('Y-m-d');
         $attributes['due_date'] = '';
-        $attributes['expiry_date'] = '';
+        $attributes['profile_name'] = '';
         #reset some values
 
         $attributes['contact']['currency'] = $attributes['contact']['currency_and_exchange_rate'];
         $attributes['contact']['currencies'] = $attributes['contact']['currencies_and_exchange_rates'];
 
-        $attributes['contact_id'] = $attributes['debit_contact_id'];
         $attributes['taxes'] = json_decode('{}');
 
         foreach ($attributes['items'] as $key => &$item)
@@ -342,7 +341,7 @@ class RecurringBillService
 
     public static function approve($id)
     {
-        $Txn = RecurringBill::with(['ledgers'])->findOrFail($id);
+        $Txn = RecurringBill::findOrFail($id);
 
         if (strtolower($Txn->status) != 'draft')
         {
