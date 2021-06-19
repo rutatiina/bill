@@ -349,8 +349,6 @@ class RecurringBillService
             return false;
         }
 
-        $data = $Txn->toArray();
-
         //start database transaction
         DB::connection('tenant')->beginTransaction();
 

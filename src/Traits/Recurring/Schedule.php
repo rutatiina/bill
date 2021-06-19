@@ -2,7 +2,7 @@
 
 namespace Rutatiina\Bill\Traits\Recurring;
 
-use Rutatiina\Bill\Models\BillRecurringProperties;
+use Rutatiina\Bill\Models\RecurringBill;
 
 trait Schedule
 {
@@ -24,7 +24,7 @@ trait Schedule
 
         //the script to process recurring requests
 
-        $tasks = BillRecurringProperties::withoutGlobalScopes()
+        $tasks = RecurringBill::withoutGlobalScopes()
             ->where('status', 'active')
             ->get();
 
