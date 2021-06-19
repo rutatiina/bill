@@ -60,7 +60,7 @@ class RecurringBillController extends Controller
 
         $txnAttributes = (new RecurringBill())->rgGetAttributes();
 
-        $txnAttributes['status'] = 'approved';
+        $txnAttributes['status'] = 'active';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
         $txnAttributes['base_currency'] = $tenant->base_currency;
         $txnAttributes['quote_currency'] = $tenant->base_currency;
@@ -193,9 +193,9 @@ class RecurringBillController extends Controller
 
     #-----------------------------------------------------------------------------------
 
-    public function approve($id)
+    public function activate($id)
     {
-        $approve = RecurringBillService::approve($id);
+        $approve = RecurringBillService::activate($id);
 
         if ($approve == false)
         {
@@ -207,7 +207,7 @@ class RecurringBillController extends Controller
 
         return [
             'status' => true,
-            'messages' => ['Recurring Bill approved'],
+            'messages' => ['Recurring Bill activated'],
         ];
 
     }

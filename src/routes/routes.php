@@ -24,7 +24,7 @@ Route::group(['middleware' => ['web', 'auth', 'tenant', 'service.accounting']], 
 
         //Route::get('summary', 'Rutatiina\Bill\Http\Controllers\RecurringBillController@summary');
         Route::post('export-to-excel', 'Rutatiina\Bill\Http\Controllers\RecurringBillController@exportToExcel');
-        Route::post('{id}/approve', 'Rutatiina\Bill\Http\Controllers\RecurringBillController@approve');
+        Route::post('{id}/activate', 'Rutatiina\Bill\Http\Controllers\RecurringBillController@activate');
         //Route::post('contact-estimates', 'Rutatiina\Bill\Http\Controllers\Sales\ReceiptController@estimates');
         Route::get('{id}/copy', 'Rutatiina\Bill\Http\Controllers\RecurringBillController@copy');
 
