@@ -116,9 +116,6 @@ class BillValidateService
                 $itemTaxableAmount  -= $itemTax['inclusive']; //calculate the item taxable amount more by removing the inclusive amount
             }
 
-            //get the item
-            $itemModel = Item::find($item['item_id']);
-
             //use item selling_financial_account_code if available and default if not
             $financialAccountToDebit = $item['debit_financial_account_code'];
 
@@ -140,8 +137,7 @@ class BillValidateService
                 'taxes' => $itemTaxes,
             ];
 
-
-            //CR ledger
+            //DR ledger
             $data['ledgers'][$financialAccountToDebit]['financial_account_code'] = $financialAccountToDebit;
             $data['ledgers'][$financialAccountToDebit]['effect'] = 'debit';
             $data['ledgers'][$financialAccountToDebit]['total'] = @$data['ledgers'][$financialAccountToDebit]['total'] + $itemTaxableAmount;
