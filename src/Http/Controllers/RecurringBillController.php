@@ -106,7 +106,7 @@ class RecurringBillController extends Controller
             'status' => true,
             'messages' => ['Recurring Bill saved'],
             'number' => 0,
-            'callback' => URL::route('recurring-bills.show', [$storeService->id], false)
+            'callback' => route('recurring-bills.show', [$storeService->id], false)
         ];
     }
 
@@ -167,7 +167,7 @@ class RecurringBillController extends Controller
             'status' => true,
             'messages' => ['Recurring Bill updated'],
             'number' => 0,
-            'callback' => URL::route('recurring-bills.show', [$updateService->id], false)
+            'callback' => route('recurring-bills.show', [$updateService->id], false)
         ];
     }
 
@@ -179,7 +179,8 @@ class RecurringBillController extends Controller
         {
             return [
                 'status' => true,
-                'messages' => 'Recurring Bill deleted',
+                'messages' => ['Recurring Bill deleted'],
+                'callback' => route('recurring-bills.index', [], false)
             ];
         }
         else
