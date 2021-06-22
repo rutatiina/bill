@@ -144,7 +144,7 @@ class BillValidateService
             //CR ledger
             $data['ledgers'][$financialAccountToDebit]['financial_account_code'] = $financialAccountToDebit;
             $data['ledgers'][$financialAccountToDebit]['effect'] = 'debit';
-            $data['ledgers'][$financialAccountToDebit]['total'] = @$data['ledgers'][$financialAccountToDebit]['total'] + $taxableAmount;
+            $data['ledgers'][$financialAccountToDebit]['total'] = @$data['ledgers'][$financialAccountToDebit]['total'] + $itemTaxableAmount;
             $data['ledgers'][$financialAccountToDebit]['contact_id'] = $data['contact_id'];
         }
 

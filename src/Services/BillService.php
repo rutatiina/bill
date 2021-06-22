@@ -125,18 +125,12 @@ class BillService
             BillItemService::store($data);
 
             //Save the ledgers >> $data['ledgers']; and update the balances
-            BillLedgerService::store($data);
+            $Txn->ledgers()->createMany($data['ledgers']);
+
+            //$Txn->refresh(); //make the ledgers relationship infor available
 
             //check status and update financial account and contact balances accordingly
-            $invoiceApprovalService = BillApprovalService::run($data);
-
-            //update the status of the txn
-            if ($invoiceApprovalService)
-            {
-                $Txn->status = $data['status'];
-                $Txn->balances_where_updated = 1;
-                $Txn->save();
-            }
+            BillApprovalService::run($Txn);
 
             DB::connection('tenant')->commit();
 
@@ -147,20 +141,20 @@ class BillService
         {
             DB::connection('tenant')->rollBack();
 
-            Log::critical('Fatal Internal Error: Failed to save invoice to database');
+            Log::critical('Fatal Internal Error: Failed to save bill to database');
             Log::critical($e);
 
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'Error: Failed to save invoice to database.';
+                self::$errors[] = 'Error: Failed to save bill to database.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to save invoice to database. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to save bill to database. Please contact Admin';
             }
 
             return false;
@@ -192,86 +186,44 @@ class BillService
                 return false;
             }
 
-            //Delete affected relations
-            $Txn->ledgers()->delete();
-            $Txn->items()->delete();
-            $Txn->item_taxes()->delete();
-            $Txn->comments()->delete();
-
             //reverse the account balances
             AccountBalanceUpdateService::doubleEntry($Txn->toArray(), true);
 
             //reverse the contact balances
             ContactBalanceUpdateService::doubleEntry($Txn->toArray(), true);
 
-            $Txn->tenant_id = $data['tenant_id'];
-            $Txn->created_by = Auth::id();
-            //$Txn->document_name = $data['document_name'];
-            $Txn->number = $data['number'];
-            $Txn->date = $data['date'];
-            $Txn->credit_financial_account_code = $data['credit_financial_account_code'];
-            $Txn->contact_id = $data['contact_id'];
-            $Txn->contact_name = $data['contact_name'];
-            $Txn->contact_address = $data['contact_address'];
-            $Txn->reference = $data['reference'];
-            $Txn->base_currency = $data['base_currency'];
-            $Txn->quote_currency = $data['quote_currency'];
-            $Txn->exchange_rate = $data['exchange_rate'];
-            $Txn->taxable_amount = $data['taxable_amount'];
-            $Txn->total = $data['total'];
-            $Txn->branch_id = $data['branch_id'];
-            $Txn->store_id = $data['store_id'];
-            $Txn->due_date = $data['due_date'];
-            $Txn->contact_notes = $data['contact_notes'];
-            $Txn->terms_and_conditions = $data['terms_and_conditions'];
-            $Txn->status = $data['status'];
+            //Delete affected relations
+            $Txn->ledgers()->delete();
+            $Txn->items()->delete();
+            $Txn->item_taxes()->delete();
+            $Txn->comments()->delete();
+            $Txn->delete();
 
-            $Txn->save();
-
-            $data['id'] = $Txn->id;
-
-            //print_r($data['items']); exit;
-
-            //Save the items >> $data['items']
-            BillItemService::store($data);
-
-            //Save the ledgers >> $data['ledgers']; and update the balances
-            BillLedgersService::store($data);
-
-            //check status and update financial account and contact balances accordingly
-            $invoiceApprovalService = BillApprovalService::run($data);
-
-            //update the status of the txn
-            if ($invoiceApprovalService)
-            {
-                $Txn->status = $data['status'];
-                $Txn->balances_where_updated = 1;
-                $Txn->save();
-            }
+            $txnStore = self::store($requestInstance);
 
             DB::connection('tenant')->commit();
 
-            return $Txn;
+            return $txnStore;
 
         }
         catch (\Throwable $e)
         {
             DB::connection('tenant')->rollBack();
 
-            Log::critical('Fatal Internal Error: Failed to update invoice in database');
+            Log::critical('Fatal Internal Error: Failed to update bill in database');
             Log::critical($e);
 
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'Error: Failed to update invoice in database.';
+                self::$errors[] = 'Error: Failed to update bill in database.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to update invoice in database. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to update bill in database. Please contact Admin';
             }
 
             return false;
@@ -317,20 +269,20 @@ class BillService
         {
             DB::connection('tenant')->rollBack();
 
-            Log::critical('Fatal Internal Error: Failed to delete invoice from database');
+            Log::critical('Fatal Internal Error: Failed to delete bill from database');
             Log::critical($e);
 
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'Error: Failed to delete invoice from database.';
+                self::$errors[] = 'Error: Failed to delete bill from database.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to delete invoice from database. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to delete bill from database. Please contact Admin';
             }
 
             return false;
@@ -394,27 +346,17 @@ class BillService
 
         if (!in_array($Txn->status, config('financial-accounting.approvable_status')))
         {
-            self::$errors[] = $Txn->status . ' invoice cannot be approved';
+            self::$errors[] = $Txn->status . ' bill cannot be approved';
             return false;
         }
-
-        $data = $Txn->toArray();
 
         //start database transaction
         DB::connection('tenant')->beginTransaction();
 
         try
         {
-            $data['status'] = 'approved';
-            $invoiceApprovalService = BillApprovalService::run($data);
-
-            //update the status of the txn
-            if ($invoiceApprovalService)
-            {
-                $Txn->status = 'approved';
-                $Txn->balances_where_updated = 1;
-                $Txn->save();
-            }
+            $Txn->status = 'approved';
+            BillApprovalService::run($Txn);
 
             DB::connection('tenant')->commit();
 
@@ -427,14 +369,14 @@ class BillService
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'DB Error: Failed to approve invoice.';
+                self::$errors[] = 'DB Error: Failed to approve bill.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to approve invoice. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to approve bill. Please contact Admin';
             }
 
             return false;

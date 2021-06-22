@@ -3,7 +3,6 @@
 namespace Rutatiina\Bill\Http\Controllers;
 
 use Rutatiina\Bill\Services\BillService;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -110,7 +109,7 @@ class BillController extends Controller
             'status' => true,
             'messages' => ['Bill saved'],
             'number' => 0,
-            'callback' => URL::route('bills.show', [$storeService->id], false)
+            'callback' => route('bills.show', [$storeService->id], false)
         ];
 
     }
@@ -170,7 +169,7 @@ class BillController extends Controller
             'status' => true,
             'messages' => ['Bill updated'],
             'number' => 0,
-            'callback' => URL::route('bills.show', [$storeService->id], false)
+            'callback' => route('bills.show', [$storeService->id], false)
         ];
     }
 
@@ -183,7 +182,7 @@ class BillController extends Controller
             return [
                 'status' => true,
                 'messages' => ['Bill deleted'],
-                'callback' => URL::route('bills.index', [], false)
+                'callback' => route('bills.index', [], false)
             ];
         }
         else
