@@ -3,9 +3,12 @@
 namespace Rutatiina\Bill\Traits\Recurring;
 
 use Rutatiina\Bill\Models\RecurringBill;
+use Rutatiina\FinancialAccounting\Traits\Schedule as FinancialAccountingScheduleTrait;
 
 trait Schedule
 {
+    use FinancialAccountingScheduleTrait;
+
     /**
      * Execute the console command.
      *
