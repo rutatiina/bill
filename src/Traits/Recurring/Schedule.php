@@ -2,6 +2,7 @@
 
 namespace Rutatiina\Bill\Traits\Recurring;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Rutatiina\Bill\Models\RecurringBill;
 use Rutatiina\FinancialAccounting\Traits\Schedule as FinancialAccountingScheduleTrait;
@@ -22,6 +23,7 @@ trait Schedule
 
         config(['app.scheduled_process' => true]);
 
+        if (!DB::connection('tenant')->getDatabaseName()) return false;
         if (!Schema::hasTable((new RecurringBill)->getTable())) return false;
 
         //$schedule->call(function () {
