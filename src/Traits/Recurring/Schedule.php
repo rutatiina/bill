@@ -23,8 +23,15 @@ trait Schedule
 
         config(['app.scheduled_process' => true]);
 
-        if (!DB::connection('tenant')->getDatabaseName()) return false;
-        if (!Schema::hasTable((new RecurringBill)->getTable())) return false;
+        try
+        {
+            DB::connection('tenant')->getDatabaseName();
+            Schema::hasTable((new RecurringBill)->getTable());
+        }
+        catch (\Throwable $e)
+        {
+            return false;
+        }
 
         //$schedule->call(function () {
         //    Log::info('recurringInvoiceSchedule via trait has been called #updated');
