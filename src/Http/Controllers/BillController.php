@@ -2,12 +2,13 @@
 
 namespace Rutatiina\Bill\Http\Controllers;
 
-use Rutatiina\Bill\Services\BillService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Request as FacadesRequest;
 use Rutatiina\Bill\Models\Bill;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Rutatiina\Bill\Models\BillSetting;
+use Rutatiina\Bill\Services\BillService;
+use Illuminate\Support\Facades\Request as FacadesRequest;
 
 class BillController extends Controller
 {
@@ -53,6 +54,8 @@ class BillController extends Controller
             return view('ui.limitless::layout_2-ltr-default.appVue');
         }
 
+        $settings = BillSetting::firstOrFail();
+
         $tenant = Auth::user()->tenant;
 
         $txnAttributes = (new Bill())->rgGetAttributes();
@@ -80,7 +83,7 @@ class BillController extends Controller
             'taxes' => [],
             'item_id' => '',
             'contact_id' => '',
-            'debit_financial_account_code' => null,
+            'debit_financial_account_code' => $settings->debit_financial_account_code,
         ]];
 
         return [
