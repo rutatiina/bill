@@ -182,7 +182,7 @@ class BillService
 
             if ($Txn->status == 'approved')
             {
-                self::$errors[] = 'Approved Transaction cannot be not be edited';
+                self::$errors[] = 'Approved Bill cannot be not be edited';
                 return false;
             }
 
@@ -242,7 +242,7 @@ class BillService
 
             if ($Txn->status == 'approved')
             {
-                self::$errors[] = 'Approved Transaction cannot be not be deleted';
+                self::$errors[] = 'Approved Bill(s) cannot be not be deleted';
                 return false;
             }
 
