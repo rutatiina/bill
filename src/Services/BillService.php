@@ -291,6 +291,60 @@ class BillService
         }
     }
 
+    public static function cancel($id)
+    {
+        //start database transaction
+        DB::connection('tenant')->beginTransaction();
+
+        try
+        {
+            $Txn = Bill::with('items', 'ledgers')->findOrFail($id);
+
+            if ($Txn->status != 'approved')
+            {
+                self::$errors[] = 'Only Approved Bill(s) can be canceled';
+                return false;
+            }
+
+            $Txn->status = 'canceled';
+            $Txn->canceled = 1;
+            $Txn->save();
+
+            //reverse the account balances
+            AccountBalanceUpdateService::doubleEntry($Txn, true);
+
+            //reverse the contact balances
+            ContactBalanceUpdateService::doubleEntry($Txn, true);
+
+            DB::connection('tenant')->commit();
+
+            return true;
+
+        }
+        catch (\Throwable $e)
+        {
+            DB::connection('tenant')->rollBack();
+
+            Log::critical('Fatal Internal Error: Failed to cancel bill from database');
+            Log::critical($e);
+
+            //print_r($e); exit;
+            if (App::environment('local'))
+            {
+                self::$errors[] = 'Error: Failed to cancel bill from database.';
+                self::$errors[] = 'File: ' . $e->getFile();
+                self::$errors[] = 'Line: ' . $e->getLine();
+                self::$errors[] = 'Message: ' . $e->getMessage();
+            }
+            else
+            {
+                self::$errors[] = 'Fatal Internal Error: Failed to cancel bill from database. Please contact Admin';
+            }
+
+            return false;
+        }
+    }
+
     public static function copy($id)
     {
         $taxes = Tax::all()->keyBy('code');
@@ -383,6 +437,15 @@ class BillService
 
             return false;
         }
+    }
+
+    public static function cancelMany($ids)
+    {
+        foreach($ids as $id)
+        {
+            if(!self::cancel($id)) return false;
+        }
+        return true;
     }
 
 }

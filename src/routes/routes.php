@@ -1,14 +1,17 @@
 <?php
+use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['web', 'auth', 'tenant', 'service.accounting']], function() {
 
 	Route::prefix('bills')->group(function () {
 
+        Route::post('routes', 'Rutatiina\Bill\Http\Controllers\BillController@routes')->name('bill.routes');
         //Route::get('summary', 'Rutatiina\Bill\Http\Controllers\BillController@summary');
         Route::post('export-to-excel', 'Rutatiina\Bill\Http\Controllers\BillController@exportToExcel');
         Route::post('{id}/approve', 'Rutatiina\Bill\Http\Controllers\BillController@approve');
         //Route::post('contact-bills', 'Rutatiina\Bill\Http\Controllers\Sales\ReceiptController@bills');
         Route::get('{id}/copy', 'Rutatiina\Bill\Http\Controllers\BillController@copy');
+        Route::patch('cancel', 'Rutatiina\Bill\Http\Controllers\BillController@cancel')->name('bill.cancel');
 
     });
 

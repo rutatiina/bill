@@ -61,7 +61,7 @@ class BillController extends Controller
         $txnAttributes = (new Bill())->rgGetAttributes();
 
         $txnAttributes['number'] = BillService::nextNumber();
-        $txnAttributes['status'] = 'approved';
+        $txnAttributes['status'] = 'draft'; //'approved'; //this was changes to draft so that the option of editing is available before approving
         $txnAttributes['contact_id'] = '';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
         $txnAttributes['date'] = date('Y-m-d');
@@ -234,6 +234,31 @@ class BillController extends Controller
             'txnUrlStore' => '/bills', #required
             'txnAttributes' => $txnAttributes, #required
         ];
+    }
+
+    public function routes()
+    {
+        return [
+            'cancel' => route('bill.cancel'),
+        ];
+    }
+
+    public function cancel(Request $request)
+    {
+        if (BillService::cancelMany($request->ids))
+        {
+            return [
+                'status' => true,
+                'messages' => [count($request->ids) . ' Bill(s) canceled.'],
+            ];
+        }
+        else
+        {
+            return [
+                'status' => false,
+                'messages' => BillService::$errors
+            ];
+        }
     }
 
 }
