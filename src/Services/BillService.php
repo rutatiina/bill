@@ -306,15 +306,15 @@ class BillService
                 return false;
             }
 
-            $Txn->status = 'canceled';
-            $Txn->canceled = 1;
-            $Txn->save();
-
             //reverse the account balances
             AccountBalanceUpdateService::doubleEntry($Txn, true);
 
             //reverse the contact balances
             ContactBalanceUpdateService::doubleEntry($Txn, true);
+
+            $Txn->status = 'canceled';
+            $Txn->canceled = 1;
+            $Txn->save();
 
             DB::connection('tenant')->commit();
 
