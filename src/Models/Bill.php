@@ -26,6 +26,10 @@ class Bill extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'canceled' => 'integer',
+    ];
+
     protected $appends = [
         'number_string',
         'total_in_words',
