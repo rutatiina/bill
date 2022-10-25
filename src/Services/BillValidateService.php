@@ -5,6 +5,7 @@ namespace Rutatiina\Bill\Services;
 use Illuminate\Support\Facades\Validator;
 use Rutatiina\Contact\Models\Contact;
 use Rutatiina\Bill\Models\BillSetting;
+use Rutatiina\FinancialAccounting\Models\Account;
 use Rutatiina\Item\Models\Item;
 
 class BillValidateService
@@ -101,6 +102,7 @@ class BillValidateService
 
         //Formulate the DB ready items array
         $data['items'] = [];
+
         foreach ($requestInstance->items as $key => $item)
         {
             $itemTaxes = $requestInstance->input('items.'.$key.'.taxes', []);
@@ -119,7 +121,7 @@ class BillValidateService
             //use item selling_financial_account_code if available and default if not
             $financialAccountToDebit = $item['debit_financial_account_code'];
 
-            $data['items'][] = [
+            $_item_ = [
                 'tenant_id' => $data['tenant_id'],
                 'created_by' => $data['created_by'],
                 'contact_id' => $item['contact_id'],
@@ -137,12 +139,17 @@ class BillValidateService
                 'taxes' => $itemTaxes,
             ];
 
+            $data['items'][] = $_item_;
+
             //DR ledger
             $data['ledgers'][$financialAccountToDebit]['financial_account_code'] = $financialAccountToDebit;
             $data['ledgers'][$financialAccountToDebit]['effect'] = 'debit';
             $data['ledgers'][$financialAccountToDebit]['total'] = @$data['ledgers'][$financialAccountToDebit]['total'] + $itemTaxableAmount;
             $data['ledgers'][$financialAccountToDebit]['contact_id'] = $data['contact_id'];
         }
+
+        //items that have to be added to the inventory
+        $data['inventory_items'] = BillService::inventoryItems($data);
 
         $data['taxable_amount'] = $taxableAmount;
         $data['total'] = $txnTotal;

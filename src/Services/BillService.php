@@ -2,15 +2,17 @@
 
 namespace Rutatiina\Bill\Services;
 
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Rutatiina\Tax\Models\Tax;
 use Rutatiina\Bill\Models\Bill;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Rutatiina\Bill\Models\BillSetting;
+use Rutatiina\FinancialAccounting\Models\Account;
+use Rutatiina\GoodsReceived\Services\GoodsReceivedInventoryService;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
-use Rutatiina\Bill\Models\BillSetting;
-use Rutatiina\Tax\Models\Tax;
 
 class BillService
 {
@@ -129,7 +131,7 @@ class BillService
             //Save the ledgers >> $data['ledgers']; and update the balances
             $Txn->ledgers()->createMany($data['ledgers']);
 
-            //$Txn->refresh(); //make the ledgers relationship infor available
+            //$Txn->refresh(); //make the ledgers relationship info available
 
             //check status and update financial account and contact balances accordingly
             BillApprovalService::run($Txn);
@@ -398,7 +400,7 @@ class BillService
 
     public static function approve($id)
     {
-        $Txn = Bill::with(['ledgers'])->findOrFail($id);
+        $Txn = Bill::with(['items', 'ledgers'])->findOrFail($id);
 
         if (!in_array($Txn->status, config('financial-accounting.approvable_status')))
         {
@@ -446,6 +448,32 @@ class BillService
             if(!self::cancel($id)) return false;
         }
         return true;
+    }
+    
+    public static function inventoryItems($txnArrayOrModel)
+    {
+        $inventoryItems = [];
+
+        // print_r($txnArrayOrModel); exit;
+
+        foreach ($txnArrayOrModel['items'] as $key => $item)
+        {
+            $_item_ = (is_array($item)) ? $item : $item->toArray();
+            //inventory Items
+            $financialAccountToDebitModel = Account::findCode($item['debit_financial_account_code']);
+            // print_r($financialAccountToDebitModel); exit;
+            if ($financialAccountToDebitModel->type == 'asset' && $financialAccountToDebitModel->sub_type == 'inventory')
+            {
+                $_item_['financial_account_code'] = $_item_['debit_financial_account_code'];
+                $_item_['batch'] = '';
+                $_item_['units'] = $_item_['quantity'];
+
+                $inventoryItems[] = $_item_;
+            }
+
+        }
+        
+        return $inventoryItems;
     }
 
 }
