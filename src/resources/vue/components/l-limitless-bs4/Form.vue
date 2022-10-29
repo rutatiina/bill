@@ -204,14 +204,14 @@
                                                 </model-list-select>
 
                                                 <div v-show="item.type_id || item.name" class="ml-2 mr-2">
-                                                    <textarea v-model="item.description"
-                                                              :data-value="item.description"
-                                                              :data-row="index"
-                                                              rows="1"
-                                                              class="form-control mb-2"
-                                                              onkeyup="rgAutoGrow(this);"
-                                                              placeholder="Description"
-                                                              style="min-height: 30px;overflow: hidden;"></textarea>
+                                                    <textarea-autosize 
+                                                        v-model="item.description"
+                                                        :data-value="item.description"
+                                                        :data-row="index"
+                                                        rows="1"
+                                                        class="form-control mb-2"
+                                                        placeholder="Description"
+                                                        style="min-height: 30px;overflow: hidden;" />
                                                 </div>
                                             </td>
                                             <td class="p-0">
