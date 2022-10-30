@@ -121,7 +121,7 @@ class BillValidateService
             //use item selling_financial_account_code if available and default if not
             $financialAccountToDebit = $item['debit_financial_account_code'];
 
-            $_item_ = [
+            $data['items'][] = [
                 'tenant_id' => $data['tenant_id'],
                 'created_by' => $data['created_by'],
                 'contact_id' => $item['contact_id'],
@@ -138,8 +138,6 @@ class BillValidateService
                 'expiry' => $requestInstance->input('items.'.$key.'.expiry', null),
                 'taxes' => $itemTaxes,
             ];
-
-            $data['items'][] = $_item_;
 
             //DR ledger
             $data['ledgers'][$financialAccountToDebit]['financial_account_code'] = $financialAccountToDebit;

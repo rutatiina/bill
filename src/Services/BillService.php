@@ -13,6 +13,7 @@ use Rutatiina\FinancialAccounting\Models\Account;
 use Rutatiina\GoodsReceived\Services\GoodsReceivedInventoryService;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
+use Rutatiina\Item\Models\Item;
 
 class BillService
 {
@@ -458,6 +459,8 @@ class BillService
 
         foreach ($txnArrayOrModel['items'] as $key => $item)
         {
+            if (!Item::find($item['item_id'])) continue; //skip the item if the item_id is not found
+
             $_item_ = (is_array($item)) ? $item : $item->toArray();
             //inventory Items
             $financialAccountToDebitModel = Account::findCode($item['debit_financial_account_code']);
@@ -470,7 +473,6 @@ class BillService
 
                 $inventoryItems[] = $_item_;
             }
-
         }
         
         return $inventoryItems;
