@@ -135,6 +135,7 @@ class BillService
             //$Txn->refresh(); //make the ledgers relationship info available
 
             //check status and update financial account and contact balances accordingly
+            $Txn = $Txn->fresh(['items', 'ledgers']);
             BillApprovalService::run($Txn);
 
             DB::connection('tenant')->commit();
