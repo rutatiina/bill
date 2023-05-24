@@ -130,13 +130,8 @@ class BillService
             //Save the items >> $data['items']
             BillItemService::store($data);
 
-            //Save the ledgers >> $data['ledgers']; and update the balances
-            $Txn->ledgers()->createMany($data['ledgers']);
+            $Txn->refresh();
 
-            //$Txn->refresh(); //make the ledgers relationship info available
-
-            //check status and update financial account and contact balances accordingly
-            $Txn = $Txn->fresh(['items', 'ledgers']);
             BillApprovalService::run($Txn);
 
             DB::connection('tenant')->commit();
@@ -185,7 +180,7 @@ class BillService
 
         try
         {
-            $Txn = Bill::with('items', 'ledgers')->findOrFail($data['id']);
+            $Txn = Bill::with('items')->findOrFail($data['id']);
 
             if ($Txn->status == 'approved')
             {
@@ -203,7 +198,6 @@ class BillService
             ItemBalanceUpdateService::entry($Txn->toArray(), true);
 
             //Delete affected relations
-            $Txn->ledgers()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
@@ -248,19 +242,13 @@ class BillService
 
         try
         {
-            $Txn = Bill::with('items', 'ledgers')->findOrFail($id);
+            $Txn = Bill::with('items')->findOrFail($id);
 
             if ($Txn->status == 'approved')
             {
                 self::$errors[] = 'Approved Bill(s) cannot be not be deleted';
                 return false;
             }
-
-            //Delete affected relations
-            $Txn->ledgers()->delete();
-            $Txn->items()->delete();
-            $Txn->item_taxes()->delete();
-            $Txn->comments()->delete();
 
             //reverse the account balances
             AccountBalanceUpdateService::doubleEntry($Txn, true);
@@ -309,7 +297,7 @@ class BillService
 
         try
         {
-            $Txn = Bill::with('items', 'ledgers')->findOrFail($id);
+            $Txn = Bill::with('items')->findOrFail($id);
 
             if ($Txn->status != 'approved')
             {
@@ -409,7 +397,7 @@ class BillService
 
     public static function approve($id)
     {
-        $Txn = Bill::with(['items', 'ledgers'])->findOrFail($id);
+        $Txn = Bill::with(['items'])->findOrFail($id);
 
         if (!in_array($Txn->status, config('financial-accounting.approvable_status')))
         {

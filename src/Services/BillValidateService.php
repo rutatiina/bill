@@ -141,12 +141,6 @@ class BillValidateService
                 'expiry' => $requestInstance->input('items.'.$key.'.expiry', null),
                 'taxes' => $itemTaxes,
             ];
-
-            //DR ledger
-            $data['ledgers'][$financialAccountToDebit]['financial_account_code'] = $financialAccountToDebit;
-            $data['ledgers'][$financialAccountToDebit]['effect'] = 'debit';
-            $data['ledgers'][$financialAccountToDebit]['total'] = @$data['ledgers'][$financialAccountToDebit]['total'] + $itemTaxableAmount;
-            $data['ledgers'][$financialAccountToDebit]['contact_id'] = $data['contact_id'];
         }
 
         //items that have to be added to the inventory
@@ -154,29 +148,6 @@ class BillValidateService
 
         $data['taxable_amount'] = $taxableAmount;
         $data['total'] = $txnTotal;
-
-
-        //CR ledger
-        $data['ledgers'][] = [
-            'financial_account_code' => $data['credit_financial_account_code'],
-            'effect' => 'credit',
-            'total' => $data['total'],
-            'contact_id' => $data['contact_id']
-        ];
-
-        //print_r($data['ledgers']); exit;
-
-        //Now add the default values to items and ledgers
-
-        foreach ($data['ledgers'] as &$ledger)
-        {
-            $ledger['tenant_id'] = $data['tenant_id'];
-            $ledger['date'] = date('Y-m-d', strtotime($data['date']));
-            $ledger['base_currency'] = $data['base_currency'];
-            $ledger['quote_currency'] = $data['quote_currency'];
-            $ledger['exchange_rate'] = $data['exchange_rate'];
-        }
-        unset($ledger);
 
         //Return the array of txns
         //print_r($data); exit;

@@ -126,11 +126,12 @@ class BillController extends Controller
         }
 
         $txn = Bill::findOrFail($id);
-        $txn->load('contact', 'items.taxes', 'ledgers');
+        $txn->load('contact', 'items.taxes');
         $txn->setAppends([
             'taxes',
             'number_string',
-            'total_in_words',
+            'total_in_words', 
+            'ledgers'
         ]);
 
         return $txn->toArray();
