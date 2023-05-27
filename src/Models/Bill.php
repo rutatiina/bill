@@ -182,12 +182,10 @@ class Bill extends Model
 
         foreach ($txn->items as $item)
         {
-            $taxable_amount = $item->taxable_amount ?? $item->total;
-
             //DR ledger
             $ledgers[$item->debit_financial_account_code]['financial_account_code'] = $item->debit_financial_account_code;
             $ledgers[$item->debit_financial_account_code]['effect'] = 'debit';
-            $ledgers[$item->debit_financial_account_code]['total'] = ($ledgers[$item->debit_financial_account_code]['total'] ?? 0) + $taxable_amount;
+            $ledgers[$item->debit_financial_account_code]['total'] = ($ledgers[$item->debit_financial_account_code]['total'] ?? 0) + $item->taxable_amount;
             $ledgers[$item->debit_financial_account_code]['contact_id'] = $txn->contact_id;
         }
 
